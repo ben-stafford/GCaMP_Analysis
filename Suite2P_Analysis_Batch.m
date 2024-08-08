@@ -1,11 +1,17 @@
-%% Load and analyze data from Suite2P files
+% Load and analyze data from Suite2P files
 clear all
 
-experimentName = '1111';
-recordingDay = 'day1';
+experimentName = '6570';
+recordingDay = 'hab1';
 
 % Change this to match the directory that contains the Suite2P mat file you
 % want to load and analyze
+
+% suite2pDir = ['~/Dropbox/Salk/GCaMP/GCaMP_Data/', experimentName, '/', recordingDay,...
+%     '/Suite_2P'];
+% 
+% scanboxDir = ['~/Dropbox/Salk/GCaMP/GCaMP_Data/', experimentName, '/', recordingDay,...
+%     '/Scanbox_Files'];
 
 suite2pDir = ['/Volumes/EPHYS_000/GCaMP_Data/', experimentName, '/', recordingDay,...
     '/Suite_2P'];
@@ -207,6 +213,9 @@ for m = 1:length(files_to_analyze)
     load([analyzerPath, '/',  analyzerFile], '-mat');
     [trial_num, stimTime] = looper_2024([analyzerPath, '/', analyzerFile]);
 
+    % trial_num is a matrix where each row contains the direction, sf, and
+    % tf of each stimulus presented
+    
     nStimParams = unique(trial_num, 'rows');
 
     % Get the parameters of the stimuli, including pre/post-stim times as
@@ -295,29 +304,20 @@ for m = 1:length(files_to_analyze)
     % matrix with a binary value for each trial
     [moveTrials, allSpeeds, meanSpeeds] = Intan_digital_movement_HW(alltrials,movtA, movtB, [on_times off_times], 0.5,fs); %size(trial_pos,1)
 
-    % Create a matrix that contains the start and stop stimulus times from the
-    % scanbox file as well as the binary values from the movement analysis so
-    % that you can quickly pull out fluorescence traces from moving and/or
-    % stationary trials based on stimulus number. This needs to include the
-    % full stimulus presentation time including pre- and post-stimulus gray
-    % screen periods
+    % Create a matrix that contains all relevant parameters for each
+    % stimulus presentation.
     %
-    % Col 1: start in frames, Col 2: end in frames, Col 3: moving?, Col 4:
-    % direction
-
-    % Check to see how many ttls there per stimulus presentation as this was
-    % changed by Peichao in late-2019.
-    if nTtlsPerStim == 4
-        moveFramesMat = [stimFrames(1:nTtlsPerStim:end), stimFrames(nTtlsPerStim:nTtlsPerStim:end), moveTrials, trial_num];
-        moveFramesShiftMat = [stimFramesShift(1:nTtlsPerStim:end), stimFramesShift(nTtlsPerStim:nTtlsPerStim:end), moveTrials, trial_num];
-
-        trialInfoMat = [stimFrames(1:nTtlsPerStim:end), stimFrames(2:nTtlsPerStim:end), stimFrames(3:nTtlsPerStim:end),...
-            stimFrames(4:nTtlsPerStim:end), moveTrials, trial_num];
-
-    elseif nTtlsPerStim == 2
-        moveFramesMat = [stimFrames(1:nTtlsPerStim:end), stimFrames(2:nTtlsPerStim:end), moveTrials, trial_num];
-        moveFramesShiftMat = [stimFramesShift(1:nTtlsPerStim:end), stimFramesShift(2:nTtlsPerStim:end), moveTrials, trial_num];
-    end
+    % Col 1: trial start in frames
+    % Col 2: stimulus start in frames
+    % Col 3: stimulus end in frames
+    % Col 4: trial end in frames
+    % Col 5: binary value indicating if animal was moving (1 = moving)
+    % Col 6: direction of stimulus
+    % Col 7: SF of stimulus
+    % Col 8: TF of stimulus
+    
+    trialInfoMat = [stimFrames(1:nTtlsPerStim:end), stimFrames(2:nTtlsPerStim:end), stimFrames(3:nTtlsPerStim:end),...
+        stimFrames(4:nTtlsPerStim:end), moveTrials, trial_num];
 
     % Subtract off photobleaching decay using polynomial fit to the blank trials
     if photoBleachSubtract == 1
@@ -325,8 +325,8 @@ for m = 1:length(files_to_analyze)
         tracesBlankSub = nan(size(tracesExpt));
 
         % Get the stimulus times that correspond to blank trials
-        blankTrialsIndex = find(moveFramesMat(:,4) == 500);
-        blankTrials = moveFramesMat(blankTrialsIndex,1:2);
+        blankTrialsIndex = find(trialInfoMat(:,6) == 500);
+        blankTrials = trialInfoMat(blankTrialsIndex,1:2);
 
         % Shift back tFrames because the raw trace won't be shifted.
         blankTrials = blankTrials;
@@ -367,16 +367,23 @@ for m = 1:length(files_to_analyze)
 
     % Split raw fluorescence traces and calculate dF/F
 
+    % The trial times in frames in the scanbox file don't always produce
+    % trials of the exact same number of samples. They seem to alternate by
+    % one frame every other trial, so trim all traces to be the smallest
+    % trail size.
+    min_trial_length = floor(min(trialInfoMat(:,4)-trialInfoMat(:,1)));
+    
     % Create NaN array to hold raw fluorescence traces for each trial for each cell
-    rawCellTrials = nan(size(cell_ids,1), size(trial_num,1), ceil(max(moveFramesMat(:,2)-moveFramesMat(:,1))));
-
+    rawCellTrials = nan(size(cell_ids,1), size(trial_num,1), min_trial_length);
+    
     % Create NaN array to hold dF/F traces for each trial for each cell
-    dfofCellTrials = nan(size(cell_ids,1), size(trial_num,1), ceil(max(moveFramesMat(:,2)-moveFramesMat(:,1))));
+    dfofCellTrials = nan(size(cell_ids,1), size(trial_num,1), min_trial_length);
 
     % Create NaN array to hold mean and max dF/F during stimulus presentation for each trial for each
     % cell
     meanDfofCellTrials = nan(size(cell_ids,1), size(trial_num,1), 1);
     maxDfofCellTrials = nan(size(cell_ids,1), size(trial_num,1), 1);
+
 
     for j = 1:size(cell_ids,1)
         % Get the full fluorescence trace for the cell being examined
@@ -384,17 +391,23 @@ for m = 1:length(files_to_analyze)
 
         % Go through each stimulus presentation and cut out the trace aligned
         % with the stimulus start and stop times in frames
-        for i = 1:size(moveFramesMat,1)
+        for i = 1:size(trialInfoMat,1)
+            % trial start, end, and stimulus start times in frames
+            trial_start = trialInfoMat(i,1);
+            trial_end = trial_start + (min_trial_length - 1);
+            trial_length = trial_end - trial_start;
+            stim_start = trialInfoMat(i,2) - trialInfoMat(i,1);
+            
             % Trace for trial being examined
-            tmpTrace = cellTrace(moveFramesMat(i,1):moveFramesMat(i,2));
+            tmpTrace = cellTrace(trial_start:trial_end);
             % Baseline from trial for dF/F calculation
-            tmpBaseline = mean(tmpTrace(1:fps*preTime));
+            tmpBaseline = mean(tmpTrace(1:stim_start));
             % Calculate dF/F
             dfofTrace = (tmpTrace-tmpBaseline)./tmpBaseline;
             % Find max dF/F during stimulus presentation, including post-stim
-            maxDfofTrace = max(dfofTrace((fps*preTime):(fps*preTime+1) + (fps*(stimTime+postTime)-1)));
+            maxDfofTrace = max(dfofTrace(stim_start:end));
             % Find mean df/F during stimulus presentation, including post-stim
-            meanDfofTrace = mean(dfofTrace((fps*preTime):(fps*preTime+1) + (fps*(stimTime+postTime)-1)));
+            meanDfofTrace = mean(dfofTrace(stim_start:end));
 
             % Place values in matrices for later analysis
             rawCellTrials(j,i,1:size(tmpTrace,2)) = tmpTrace;
@@ -407,9 +420,9 @@ for m = 1:length(files_to_analyze)
     end
 
     % Get the trials that occured when the mouse was running or stationary
-    moveTrials = find(moveFramesMat(:,3) == 1);
-    statTrials = find(moveFramesMat(:,3) == 0);
-    allTrials = find(moveFramesMat(:,3) < 2);
+    moveTrials = find(trialInfoMat(:,5) == 1);
+    statTrials = find(trialInfoMat(:,5) == 0);
+    allTrials = find(trialInfoMat(:,5) < 2);
 
     disp(['Calculating Responsive and Reliable Metrics'])
 
@@ -433,7 +446,7 @@ for m = 1:length(files_to_analyze)
     % rename a few variables before saving them
     cellIds = cell_ids;
     trialStim = trial_num;
-    trialMoveInfo = moveFramesMat(:,3:4);
+    trialMoveInfo = trialInfoMat(:,5:6);
     stimInfo = [fps, preTime, stimTime, postTime];
     
     % Create a directory to save the data in
@@ -443,8 +456,9 @@ for m = 1:length(files_to_analyze)
     end
     cd 'Analysis'
 
-    % Make a data structure that has the same number of rows as there are cells
-    % being analyzed
+    
+    disp(['Saving files'])
+
     
     % Clear the old data structure if it exists
     if exist('gcamp_data','var')
@@ -458,9 +472,13 @@ for m = 1:length(files_to_analyze)
     % Cell IDs
     gcamp_data(1).cell_ids = [];
     % Dfof trace for each trial presented for each cell. Each entry (row) will
-    % be m x n matric, where m = number of trials and n = the duration of each
-    % trial in frames
+    % be m x n matrix, where m = number of trials and n = the dfof trace
+    % for that trial
     gcamp_data(1).dfof_traces = [];
+    % matrix of mean dfofs for all trials for each cell
+    gcamp_data(1).mean_dfof_resp = [];
+    % matrix of max dfof for all trials for each cell
+    gcamp_data(1).max_dfof_resp = [];
     % Responsive p-values for t-test
     gcamp_data(1).ttest_resp = [];
     % Responsive p-values for anova
@@ -474,6 +492,8 @@ for m = 1:length(files_to_analyze)
         gcamp_data(i).cell_ids = cellIds(i);
         gcamp_data(i).stimulus_info = trialInfoMat;
         gcamp_data(i).dfof_traces = squeeze(dfofCellTrials(i,:,:));
+        gcamp_data(i).mean_dfof_resp = squeeze(meanDfofCellTrials(i,:,:));
+        gcamp_data(i).max_dfof_resp = squeeze(maxDfofCellTrials(i,:,:));
         gcamp_data(i).ttest_resp = cellRespRelMat(i,2);
         gcamp_data(i).anova_resp = cellRespRelMat(i,3);
         gcamp_data(i).dprime = cellRespRelMat(i,4);
