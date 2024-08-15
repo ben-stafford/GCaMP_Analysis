@@ -1,8 +1,8 @@
 % Load and analyze data from Suite2P files
 clear all
 
-experimentName = '6570';
-recordingDay = 'hab1';
+experimentName = '6627';
+recordingDay = 'day5';
 
 % Change this to match the directory that contains the Suite2P mat file you
 % want to load and analyze
@@ -20,7 +20,7 @@ scanboxDir = ['/Volumes/EPHYS_000/GCaMP_Data/', experimentName, '/', recordingDa
     '/Scanbox_Files'];
 
 % Flag to analyze all files in the Scanbox_Files directory
-analyze_all_files = 0;
+analyze_all_files = 1;
 
 % Flag to turn on/off 5 frame smoothing of fluorescence traces
 smoothTraces = 1;
@@ -126,6 +126,8 @@ for m = 1:length(files_to_analyze)
     file_being_analyzed = files_to_analyze{m};
     
     file = file_being_analyzed;
+    
+    disp(['Analyzing: ', file]);
     
     for i = 1:length(hd5Files)
         fileStr = hd5Files{i};
@@ -427,15 +429,15 @@ for m = 1:length(files_to_analyze)
     disp(['Calculating Responsive and Reliable Metrics'])
 
     % Get matrices of responsivity and reliability parameters for each cell
-    cellRespRelMoveMat = getResponsiveReliableMetrics_2024(cell_ids,meanDfofCellTrials,maxDfofCellTrials,dfofCellTrials,trial_num,preTime,stimTime,fps,moveTrials);
-    cellRespRelStatMat = getResponsiveReliableMetrics_2024(cell_ids,meanDfofCellTrials,maxDfofCellTrials,dfofCellTrials,trial_num,preTime,stimTime,fps,statTrials);
+%     cellRespRelMoveMat = getResponsiveReliableMetrics_2024(cell_ids,meanDfofCellTrials,maxDfofCellTrials,dfofCellTrials,trial_num,preTime,stimTime,fps,moveTrials);
+%     cellRespRelStatMat = getResponsiveReliableMetrics_2024(cell_ids,meanDfofCellTrials,maxDfofCellTrials,dfofCellTrials,trial_num,preTime,stimTime,fps,statTrials);
     cellRespRelMat = getResponsiveReliableMetrics_2024(cell_ids,meanDfofCellTrials,maxDfofCellTrials,dfofCellTrials,trial_num,preTime,stimTime,fps,allTrials);
 
-    disp(['Calculating Tuning'])
-
-    dsiOsiMoveMat = getAllCellTuning_2024(cellRespRelMoveMat, cell_ids, nStimParams, trial_num, meanDfofCellTrials, moveTrials,0);
-    dsiOsiStatMat = getAllCellTuning_2024(cellRespRelStatMat, cell_ids, nStimParams, trial_num, meanDfofCellTrials, statTrials,0);
-    dsiOsiMat = getAllCellTuning_2024(cellRespRelMat, cell_ids, nStimParams, trial_num, meanDfofCellTrials, allTrials,0);
+%     disp(['Calculating Tuning'])
+% 
+%     dsiOsiMoveMat = getAllCellTuning_2024(cellRespRelMoveMat, cell_ids, nStimParams, trial_num, meanDfofCellTrials, moveTrials,0);
+%     dsiOsiStatMat = getAllCellTuning_2024(cellRespRelStatMat, cell_ids, nStimParams, trial_num, meanDfofCellTrials, statTrials,0);
+%     dsiOsiMat = getAllCellTuning_2024(cellRespRelMat, cell_ids, nStimParams, trial_num, meanDfofCellTrials, allTrials,0);
 
     % Creating a data structure to store this analysis that should be more
     % modular to account for running stimuli in which multiple parameters vary
@@ -485,19 +487,35 @@ for m = 1:length(files_to_analyze)
     gcamp_data(1).anova_resp = [];
     % d-prime scores
     gcamp_data(1).dprime = [];
+    % reliability threshold pass (1 = reliable cell/ROI)
+    gcamp_data(1).reliable = [];
 
 
     % Loop through the list of cells and put data in the structure
     for i = 1:length(cellIds)
         gcamp_data(i).cell_ids = cellIds(i);
-        gcamp_data(i).stimulus_info = trialInfoMat;
         gcamp_data(i).dfof_traces = squeeze(dfofCellTrials(i,:,:));
         gcamp_data(i).mean_dfof_resp = squeeze(meanDfofCellTrials(i,:,:));
         gcamp_data(i).max_dfof_resp = squeeze(maxDfofCellTrials(i,:,:));
         gcamp_data(i).ttest_resp = cellRespRelMat(i,2);
         gcamp_data(i).anova_resp = cellRespRelMat(i,3);
         gcamp_data(i).dprime = cellRespRelMat(i,4);
-
+        gcamp_data(i).reliable = cellRespRelMat(i,9);
+    end
+    
+    % Get maximum mean fluorescence of all ROIs
+    all_mean_dfof = [];
+    all_mean_dfof = [all_mean_dfof, gcamp_data(1,:).mean_dfof_resp];
+    max_mean_dfof = max(all_mean_dfof);
+    fluor_thresh = max_mean_dfof * 0.06;
+    
+    for i = 1:size(gcamp_data,2)
+        max_roi_mean_dfof = max(gcamp_data(i).mean_dfof_resp);
+        if max_roi_mean_dfof <= fluor_thresh
+            gcamp_data(i).good_fluor = 0; % not reliable, too low
+        else
+            gcamp_data(i).good_fluor = 1; % reliable, above threshold
+        end
     end
 
 
