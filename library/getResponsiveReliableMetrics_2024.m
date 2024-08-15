@@ -9,12 +9,13 @@
 % other. Col 4 is the d' for the cell. Col 5 is the mean response to the
 % stimulus that produced the maximum response. Col 6-8 are the parameters
 % of the stimulus (6: direction, 7: SF, 8: TF) that produced the maximal
-% response
+% response. Col 9 contains a binary indicating whether the cell passed the
+% dfof reliability test (0 = unreliable, 1 = reliable)
 
-function respCellMat = getResponsiveReliableMetrics_2024(cellIds, meanDfofCellTrials, maxDfofCellTrials,...
+function respCellMat = getResponsiveReliableMetrics_New_2024(cellIds, meanDfofCellTrials, maxDfofCellTrials,...
     dfofCellTrials, trialStim, preTime, stimTime, fps, trials)
     try
-        respCellMat = nan(length(cellIds),8);
+        respCellMat = nan(length(cellIds),9);
         respCellMat(:,1) = cellIds;
 
         for i = 1:size(cellIds,1)
@@ -87,6 +88,11 @@ function respCellMat = getResponsiveReliableMetrics_2024(cellIds, meanDfofCellTr
         i
     end
       
+% Finally, some ROIs with extremely high dF/Fs due to division by a very
+% small baseline were eliminated by removing any ROIs that had a trial dF/F
+% that exceeded the median maximum trial dF/F per ROI + the 95% percentile
+% maximum trial dF/F per ROI    
+    
     try
         % Calculate d' for cells
 
@@ -96,6 +102,23 @@ function respCellMat = getResponsiveReliableMetrics_2024(cellIds, meanDfofCellTr
         for i = 1:size(cellIds,1)
             % Get the max dF/F values for all trials
             cellMaxDfof = squeeze(maxDfofCellTrials(i,trials,:));
+            % Get the median of all the max trial dF/F
+            cellMedianMaxDfof = median(cellMaxDfof);
+            % Get the 95th percntile of the max trial dF/F
+            cellPercentileMaxDfof = prctile(cellMaxDfof,95);
+            % Reliability threshold is median + 95th percentile
+            dfofRelThresh = cellMedianMaxDfof + cellPercentileMaxDfof;
+            % Get mean trial values from all trials for the cell
+            cellMeanDfof = squeeze(meanDfofCellTrials(i,trials,:));
+            % Get the max of the mean trial dfof
+            cellMaxMeanTrialDfof = max(cellMeanDfof);
+            % Compare max of the mean trial dfof to the reliability
+            % threshold
+            if cellMaxMeanTrialDfof > dfofRelThresh
+                respCellMat(i,9) = 0; % not reliable, exceeded threshold
+            elseif cellMaxMeanTrialDfof <= dfofRelThresh
+                respCellMat(i,9) = 1; % reliable, below threshold
+            end
             % Find the index of the max dF/F
             prefIndex = find(cellMaxDfof == max(cellMaxDfof));
             % Get the stimulus parameter (direction) for the preferred stimulus
