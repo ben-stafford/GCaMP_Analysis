@@ -2,7 +2,7 @@
 clear all
 
 experimentName = '6627';
-recordingDay = 'day5';
+recordingDay = 'day2';
 
 % Change this to match the directory that contains the Suite2P mat file you
 % want to load and analyze
@@ -425,19 +425,6 @@ for m = 1:length(files_to_analyze)
     moveTrials = find(trialInfoMat(:,5) == 1);
     statTrials = find(trialInfoMat(:,5) == 0);
     allTrials = find(trialInfoMat(:,5) < 2);
-
-    disp(['Calculating Responsive and Reliable Metrics'])
-
-    % Get matrices of responsivity and reliability parameters for each cell
-%     cellRespRelMoveMat = getResponsiveReliableMetrics_2024(cell_ids,meanDfofCellTrials,maxDfofCellTrials,dfofCellTrials,trial_num,preTime,stimTime,fps,moveTrials);
-%     cellRespRelStatMat = getResponsiveReliableMetrics_2024(cell_ids,meanDfofCellTrials,maxDfofCellTrials,dfofCellTrials,trial_num,preTime,stimTime,fps,statTrials);
-    cellRespRelMat = getResponsiveReliableMetrics_2024(cell_ids,meanDfofCellTrials,maxDfofCellTrials,dfofCellTrials,trial_num,preTime,stimTime,fps,allTrials);
-
-%     disp(['Calculating Tuning'])
-% 
-%     dsiOsiMoveMat = getAllCellTuning_2024(cellRespRelMoveMat, cell_ids, nStimParams, trial_num, meanDfofCellTrials, moveTrials,0);
-%     dsiOsiStatMat = getAllCellTuning_2024(cellRespRelStatMat, cell_ids, nStimParams, trial_num, meanDfofCellTrials, statTrials,0);
-%     dsiOsiMat = getAllCellTuning_2024(cellRespRelMat, cell_ids, nStimParams, trial_num, meanDfofCellTrials, allTrials,0);
 
     % Creating a data structure to store this analysis that should be more
     % modular to account for running stimuli in which multiple parameters vary
