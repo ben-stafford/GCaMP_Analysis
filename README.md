@@ -48,7 +48,7 @@ The output files are named after the scanbox file that was used to generate them
 
 Tuning_Analysis.m
 
-This code takes the output files from Suite2P_Analysis_Batch.m and calculates numerous parameters for each ROI. It also allows you to analyze more than one output file at a time. This is required for stimulus sets that were collected over the course of two or more experiments. For example, when analyzing SF and TF tuning, two different experiments are typically run, each of which covers half of the SFs, TFs, and directions required for this analysis. In order to calculate the SF and TF tuning of each ROI, two files must loaded and analyzed sequentially.
+This code takes the output files from Suite2P_Analysis_Batch.m and calculates numerous parameters for each ROI. It also allows you to analyze more than one output file at a time. This is required for stimulus sets that were collected over the course of two or more experiments. For example, when analyzing SF and TF tuning, two different experiments are typically run, each of which covers half of the SFs, TFs, and directions required for this analysis. In order to calculate the SF and TF tuning of each ROI, two files must loaded and analyzed sequentially. The code should be robust enough to determine how many SFs, TFs, and directions were used in the experiments and analyze them accoridngly. However, it is important that you only analyze data from one 'set' of experiments at a time. For example, don't try to analyze an experiment with multiple SFs, TFs, and directions (a SF and TF tuning experiment) with an experiment with one SF, one TF, and multiple directions (a DS and OS experiment).
 
 When you run Tuning_Analysis.m, you specify the location of the files by providing the names and paths to them using the following variables:
 1) animal_id: the name of the animal which is typically the animal's ear tag number.
@@ -72,3 +72,13 @@ If two file are analyzed, the output file will have a name like:
 day1_000_002_control.mat
 
 Control_CNO_Compare_Compile.m
+
+This code is still a work in progress, but is fully functional for comparing one control dataset against one CNO dataset. This code will load the output files from Tuning_Analysis.m and compare various parameters between control and CNO conditions. It is robust enought to determine whether the underlying experiments were probing SF and TF tuning or DS and OS of the ROIs. Currently, you can only input one control file and one CNO file. It should go without saying, the control and CNO files should be the same type of experiemnt (i.e. don't compare a control SF and TF tuning experiment with a CNO DS and OS tuning experiment.
+
+When you run Control_CNO_Compare_Compile.m there are four variables you must manually set:
+1) animal_ids: a list of animal names which are typically the mouse ear tag number. Currently, these have to be the same.
+2) experiment_days: a list of experiment days (i.e. day1). Currently, these have to be the same.
+3) files_to_compare: a list of files to compare. The first file should be the control data (eg. day1_000_001_control.mat) and the second should be the CNO data (eg. day1_002_003_cno.mat).
+4) data_dir: the path to where the mat files are located. This will just be the directory that contains the 'Control' and 'CNO" directories created by Tuning_Analysis.m. The code will load the the data files from the Control or CNO directories automatically.
+
+There is aso one flag (compare) that should not be changed at the moment. Leave it set to 1.
