@@ -35,6 +35,8 @@ There are three 'flags' representing analysis steps you can 'turn on' by setting
 3) subtractNeuropil - when set to 1, this will subtract the neuropil signal from the fluorescence traces
 4) photoBleachSubtract - when set to 1, this will use the interleaved blank trials to fit the background fluorescnce decay with a polynomial and subtract from the fluorescence traces to try to linearize the dfof trace.
 
-The codes saves data structures for each experiment/file used from the Scanbox_Files directory in the following location:
+The code saves data structures in mat files for each experiment/file used from the Scanbox_Files directory in the following location:
 
 Experiment_Name/Recording_Day/Analysis
+
+They are named after the scanbox file that was used to generate them. A typical scanbox name is: day1_000_000.mat. The corresponding mat file in the Analysis directory would be named: day1_000_000_Data.mat
