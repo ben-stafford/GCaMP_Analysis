@@ -63,10 +63,11 @@ When you run Tuning_Analysis.m, you manually specify the location and names of t
 3) files_to_analyze: a list of the matlab files to open and analyze. These are the output files from Suite2P_Analysis_Batch.m and will have names like: day1_000_000_Data.mat, day1_000_001_Data.mat; day1_000_002_Data.mat, etc.
 4) analysisDir: the path where the files specified in files_to_analyze are located. This is typically animal_id/experiment_day/Analysis
 
-There are also three flags you can set that impact how the analysis is run and whether output mat files are saved.
+There are also four flags you can set that impact how the analysis is run and whether output mat files are saved.
 1) stationary_trials - when set to 1, the code will only analyze trails when the animal was not running.
-2) save_data - when set to 1, the code will save out data structures in a mat file in a directory created and located within the directory specified in analysisDir.
-3) cno_data - when set to 1, the output mat files will be saved in a directory named 'CNO' and have '_cno' appended to the file name, otherwise they will be saved in a directory named 'Control' and have '_control' appended to the file name.
+2) responsive_thresh - p-value below which ROIs will be considered responsive.
+3) save_data - when set to 1, the code will save out data structures in a mat file in a directory created and located within the directory specified in analysisDir.
+4) cno_data - when set to 1, the output mat files will be saved in a directory named 'CNO' and have '_cno' appended to the file name, otherwise they will be saved in a directory named 'Control' and have '_control' appended to the file name.
 
 Output:
 
