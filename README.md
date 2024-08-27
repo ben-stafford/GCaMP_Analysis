@@ -24,8 +24,11 @@ This code expects several different types of files contained within a specific d
 The code expects the directories containing these files to be located in the following directory structure:
 
 Experiment_Name/Recording_Day/Suite2P
+
 Experiment_Name/Recording_Day/Scanbox_Files
+
 Experiment_Name/Recording_Day/Analyzer_Files
+
 Experiment_Name/Recording_Day/Spike2_Files
 
 Variable Names:
