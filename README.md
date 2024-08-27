@@ -83,7 +83,7 @@ When you run Control_CNO_Compare_Compile.m there are four variables you must man
 3) files_to_compare: a list of files to compare. The first file should be the control data (eg. day1_000_001_control.mat) and the second should be the CNO data (eg. day1_002_003_cno.mat).
 4) data_dir: the path to where the mat files are located. This will just be the directory that contains the 'Control' and 'CNO" directories created by Tuning_Analysis.m. The code will load the the data files from the Control or CNO directories automatically.
 
-There is aso one flag (compare) that should not be changed at the moment. Leave it set to 1.
+There is also one flag (compare) that should not be changed at the moment. Leave it set to 1.
 
 Output:
 
