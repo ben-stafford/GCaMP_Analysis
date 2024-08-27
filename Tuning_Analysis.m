@@ -2,12 +2,12 @@
 
 clear all
 
-animal_id = '6570';
-experiment_day = 'hab1';
+animal_id = '6482';
+experiment_day = 'day5';
 
 files_to_analyze = {    
-    'hab1_000_000_Data.mat';
-%     'day4_000_004_Data.mat';
+    'day5_000_000_Data.mat';
+%     'day1_000_002_Data.mat';
 };
 
 % Flag to indicate whether to save the data and whether the data is from control or CNO conditions
@@ -17,7 +17,8 @@ cno_data = 0;
 % Flag to indicate whether you want to analyze just stationary trials or
 % all trials
 stationary_trials = 1;
-responsive_thresh = 0.05;
+responsive_thresh = 0.01;
+plot_cell_traces = 1;
 
 % Path to data
 
@@ -412,8 +413,8 @@ all_sfs = all_stim_cond_mat(:,1,1,1);
 all_tfs = all_stim_cond_mat(1,:,1,2);
 if length(all_sfs) > 1 && length(all_tfs) > 1
     figure(6); clf; hold on;
-    all_dsi_osi = squeeze(cat(3,all_tuning(all_resp_rel_idx).sf_tf_mean_resp));
-    heatmap((nanmean(all_dsi_osi,3)), all_sfs, (60./all_tfs), 1);
+    all_sf_tf = squeeze(cat(3,all_tuning(all_resp_rel_idx).sf_tf_mean_resp));
+    heatmap((nanmean(all_sf_tf,3)), all_sfs, (60./all_tfs), 1);
 elseif length(all_sfs) == 1 && length(all_tfs) == 1
     % DSI and OSI plot
     all_dsi_osi_dir = squeeze(cat(3,all_tuning(all_resp_rel_idx).sf_tf_dsi_osi));
@@ -448,9 +449,51 @@ elseif length(all_sfs) == 1 && length(all_tfs) == 1
     yl(0,max(h.Values)+size(tuned_dirs,1)*0.05);
     xlabel('Preferred Direction');
     ylabel('nCells');
+elseif length(all_sfs) == 1 && length(all_tfs) > 1 % if one SF and multiple TFs make a heatmap
+    figure(6); clf; hold on;
+    all_sf_tf = squeeze(cat(3,all_tuning(all_resp_rel_idx).sf_tf_mean_resp));
+    heatmap((nanmean(all_sf_tf,2)), all_sfs, (60./all_tfs), 1);
+elseif length(all_sfs) > 1 && length(all_tfs) == 1  % if one TF and multiple SFs make a heatmap
+    figure(6); clf; hold on;
+    all_sf_tf = squeeze(cat(3,all_tuning(all_resp_rel_idx).sf_tf_mean_resp));
+    heatmap((nanmean(all_sf_tf,2)), (60./all_tfs), all_sfs, 1);
 end
 
-
+% Plot all traces of the max response at the preferred direction (or
+% average of all directions if not DS or OS)
+if plot_cell_traces == 1
+    figure(3); clf;
+    for c = 1:length(all_resp_rel_idx)
+%     for c = 1:20 % for testing
+        tmp_sf_tf_mat = all_tuning(all_resp_rel_idx(c)).sf_tf_mean_resp;
+        tmp_traces_all = all_tuning(all_resp_rel_idx(c)).sf_tf_dirs_all_traces;
+        tmp_dsi_osi = all_tuning(all_resp_rel_idx(c)).sf_tf_dsi_osi;
+        
+        % Find the max response from the SF x TF matrux
+        tmp_max_sf_tf_idx = find(tmp_sf_tf_mat == max(tmp_sf_tf_mat(:)));
+        % Get n-dimensional matrix position of the max value
+        tmp_sf_tf_dim = [size(tmp_sf_tf_mat)]; % dimensions of sf_tf matrix
+        [A,B] = ind2sub(tmp_sf_tf_dim,tmp_max_sf_tf_idx);
+        
+        % Get the traces, DSI, OSI, preferred direction, and stimulus
+        % conditions of the max response in the matrix
+        tmp_max_traces = squeeze(tmp_traces_all(A,B,:,:,:));
+        tmp_max_dsi_osi = squeeze(tmp_dsi_osi(A,B,:));
+        tmp_stim_cond = squeeze(all_stim_cond_mat(A,B,:,:));
+        
+        % Check to see if the cell was DS or OS
+        if tmp_max_dsi_osi(1) > 0.4 && tmp_max_dsi_osi(2) > 0.2
+            dir_idx = find(tmp_stim_cond(:,3) == tmp_max_dsi_osi(3));
+        else
+            disp('Untuned cell')
+            dir_idx = (1:1:4);
+        end
+        % Get the specific traces (or averaged traces if untuned) for
+        % plotting
+        tmp_max_dir_traces = squeeze(nanmean(tmp_max_traces(dir_idx,:,:),1));
+        subplot(8,10,c); hold on; plot(nanmean(tmp_max_dir_traces)); title(['Cell: ', num2str(all_resp_rel_idx(c))]);
+    end
+end
 % Save out data
 if save_data == 1
     % First get shortened versions of the file analyzed to include in the name
