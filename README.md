@@ -25,6 +25,8 @@ For example, the scanbox files would be located at:
 
 Experiment_Name/Recording_Day/Scanbox_Files/
 
+
+
 Variable Names:
 
 In the Matlab file you specify the location of the files by providing the names of the directories where to they are located using the following variables:
