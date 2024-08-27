@@ -63,6 +63,8 @@ There are also three flags you can set that impact how the analysis is run and w
 
 Output:
 
+Depending on the experiments being analyzed, the code will either produce different plots. If you are anlyzing a SF and TF tuning set of experiments, a heatmap of the average response of all rois to the range of SFs and TFs wil be generated. If you are analyzing a DS and OS experiment, a plot of the mean +/- sem DSI and OSI, as well as a histogram of the preferred direction for all rois will be generated.
+
 When save_data = 1, the code saves data structures in mat files. The names of these output files depend on how many files were included in files_to_analyze. For each file analyzed, the code extracts the second set of three numbers in the file name (these correspond to the experiment number) and includes it in the file name. If only one file is analyzed, the output file will have a name like:
 
 day1_000_control.mat
@@ -82,3 +84,9 @@ When you run Control_CNO_Compare_Compile.m there are four variables you must man
 4) data_dir: the path to where the mat files are located. This will just be the directory that contains the 'Control' and 'CNO" directories created by Tuning_Analysis.m. The code will load the the data files from the Control or CNO directories automatically.
 
 There is aso one flag (compare) that should not be changed at the moment. Leave it set to 1.
+
+Output:
+
+Depending on the type of the experiments being analyzed, the code will either produce different plots. If you are anlyzing a SF and TF tuning set of experiments, plots of the preferred SF, TF, and TF/SF ratio in control and CNO conditions will be generated. If you are analyzing a DS and OS tunign experiment, plots of the DSI and OSI in control and CNO conditions will be generated.
+
+heatmap of the average response of all rois to the range of SFs and TFs wil be generated. If you are analyzing a DS and OS experiment, a plot of the mean +/- sem DSI and OSI, as well as a histogram of the preferred direction for all rois will be generated.
