@@ -43,7 +43,7 @@ There are also four 'flags' representing analysis steps you can 'turn on' by set
 1) analyze_all_files - when set to 1, the code will use every mat file in the Scanbox_Files directory and use it to analyze the relevant part of the fluorescence traces.
 2) smoothTraces - when set to 1, this will smooth the fluoresence traces
 3) subtractNeuropil - when set to 1, this will subtract the neuropil signal from the fluorescence traces
-4) photoBleachSubtract - when set to 1, this will use the interleaved blank trials to fit the background fluorescnce decay with a polynomial and subtract from the fluorescence traces to try to linearize the dfof trace.
+4) photoBleachSubtract - when set to 1, this will use the interleaved blank trials to fit the background fluorescence decay with a polynomial and subtract it from the fluorescence traces to try to linearize the dfof trace.
 
 Output:
 
