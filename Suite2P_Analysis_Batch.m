@@ -1,22 +1,22 @@
 % Load and analyze data from Suite2P files
 clear all
 
-experimentName = '6627';
-recordingDay = 'day2';
+animal_id = '6627';
+experiment_day = 'day2';
 
 % Change this to match the directory that contains the Suite2P mat file you
 % want to load and analyze
 
-% suite2pDir = ['~/Dropbox/Salk/GCaMP/GCaMP_Data/', experimentName, '/', recordingDay,...
+% suite2pDir = ['~/Dropbox/Salk/GCaMP/GCaMP_Data/', animal_id, '/', experiment_day,...
 %     '/Suite_2P'];
 % 
-% scanboxDir = ['~/Dropbox/Salk/GCaMP/GCaMP_Data/', experimentName, '/', recordingDay,...
+% scanboxDir = ['~/Dropbox/Salk/GCaMP/GCaMP_Data/', animal_id, '/', experiment_day,...
 %     '/Scanbox_Files'];
 
-suite2pDir = ['/Volumes/EPHYS_000/GCaMP_Data/', experimentName, '/', recordingDay,...
+suite2pDir = ['/Volumes/EPHYS_000/GCaMP_Data/', animal_id, '/', experiment_day,...
     '/Suite_2P'];
 
-scanboxDir = ['/Volumes/EPHYS_000/GCaMP_Data/', experimentName, '/', recordingDay,...
+scanboxDir = ['/Volumes/EPHYS_000/GCaMP_Data/', animal_id, '/', experiment_day,...
     '/Scanbox_Files'];
 
 % Flag to analyze all files in the Scanbox_Files directory
