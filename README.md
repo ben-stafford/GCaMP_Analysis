@@ -61,6 +61,6 @@ There are also three flags you can set that impact how the analysis is run and w
 2) save_data - when set to 1, the code will save out data structures in a mat file in a directory created and located within the dircetory specified in analysisDir.
 3) cno_data - when set to 1, the output mat files will be saved in a directory named 'CNO', otherwise they will be saved in a directory named 'Control'.
 
-   Output
+   Output Test
 
 Control_CNO_Compare_Compile.m
