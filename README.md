@@ -48,7 +48,7 @@ The output files are named after the scanbox file that was used to generate them
 
 Tuning_Analysis.m
 
-This code takes the output files from Suite2P_Analysis_Batch.m and calculates numerous parameters for each ROI. It also allows you to analyze more than one output file at a time. This is required for stimulus sets that were collected over the course of two or more experiments. For example, when analyzing SF and TF tuning, two different experiments are typically run, each of which covers half of the SFs, TFs, and directions. In order to calculate the SF and TF tuning of each ROI, two files must loaded and analyzed sequentially.
+This code takes the output files from Suite2P_Analysis_Batch.m and calculates numerous parameters for each ROI. It also allows you to analyze more than one output file at a time. This is required for stimulus sets that were collected over the course of two or more experiments. For example, when analyzing SF and TF tuning, two different experiments are typically run, each of which covers half of the SFs, TFs, and directions required for this analysis. In order to calculate the SF and TF tuning of each ROI, two files must loaded and analyzed sequentially.
 
 When you run Tuning_Analysis.m, you specify the location of the files by providing the names and paths to them using the following variables:
 1) animal_id: the name of the animal which is typically the animal's ear tag number.
