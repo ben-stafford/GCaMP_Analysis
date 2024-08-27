@@ -221,6 +221,7 @@ function resp_rel_struct = getResponsiveReliableMetrics_2024(file, tuning, cells
         end
         
     catch
-        
+        warning('No cells have been deemed responsive and reliable. Passing an empty data structure.');
+        resp_rel_struct = struct();
     end
 end
