@@ -58,9 +58,17 @@ When you run Tuning_Analysis.m, you specify the location of the files by providi
 
 There are also three flags you can set that impact how the analysis is run and whether output mat files are saved.
 1) stationary_trials - when set to 1, the code will only analyze trails when the animal was not running.
-2) save_data - when set to 1, the code will save out data structures in a mat file in a directory created and located within the dircetory specified in analysisDir.
-3) cno_data - when set to 1, the output mat files will be saved in a directory named 'CNO', otherwise they will be saved in a directory named 'Control'.
+2) save_data - when set to 1, the code will save out data structures in a mat file in a directory created and located within the directory specified in analysisDir.
+3) cno_data - when set to 1, the output mat files will be saved in a directory named 'CNO' and have '_cno' appended to the file name, otherwise they will be saved in a directory named 'Control' and have '_control' appended to the file name.
 
-   Output Test
+Output:
+
+When save_data = 1, the code saves data structures in mat files. The names of these output files depend on how many files were included in files_to_analyze. For each file analyzed, the code extracts the second set of three numbers in the file name (these correspond to the experiment number) and includes it in the file name. If only one file is analyzed, the output file will have a name like:
+
+day1_000_control.mat
+
+If two file are analyzed, the output file will have a name like:
+
+day1_000_002_control.mat
 
 Control_CNO_Compare_Compile.m
