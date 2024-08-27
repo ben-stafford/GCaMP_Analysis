@@ -1,158 +1,226 @@
-% Calculate responsiveness of cells
-%
-% This is done by grouping all mean responses of a given stimulus
-% (direction) and comparing all directions and blanks using an ANOVA
-
-% Create matrix to hold output. Col 1 is the cell number. Col 2 is the
-% p-value of the ttest comparing the max response against the blanks. Col 3
-% is is the p-value of the ANOVA comparing all the directions against each
-% other. Col 4 is the d' for the cell. Col 5 is the mean response to the
-% stimulus that produced the maximum response. Col 6-8 are the parameters
-% of the stimulus (6: direction, 7: SF, 8: TF) that produced the maximal
-% response. Col 9 contains a binary indicating whether the cell passed the
-% dfof reliability test (0 = unreliable, 1 = reliable)
-
-function respCellMat = getResponsiveReliableMetrics_New_2024(cellIds, meanDfofCellTrials, maxDfofCellTrials,...
-    dfofCellTrials, trialStim, preTime, stimTime, fps, trials)
+function resp_rel_struct = getResponsiveReliableMetrics_2024(file, tuning, cells)
     try
-        respCellMat = nan(length(cellIds),9);
-        respCellMat(:,1) = cellIds;
-
-        for i = 1:size(cellIds,1)
-            % Get all the mean responses for the cell
-            dfofAllMeans = squeeze(meanDfofCellTrials(i,trials,:));
-            stimForTrials = trialStim(trials,:);
-
-            % Create a matrix to hold the means and the stimulus parameters
-            dfofMeanParam = nan(length(dfofAllMeans),4);
-
-            % Populate with mean values and stimulus parameters
-            dfofMeanParam(:,1) = dfofAllMeans';
-            dfofMeanParam(:,2) = stimForTrials(:,1);
-            dfofMeanParam(:,3) = stimForTrials(:,2);
-            dfofMeanParam(:,4) = stimForTrials(:,3);
-
-            % Find the stimulus that generated the maximum mean response
-            maxRespIndex = find(dfofAllMeans == max(dfofAllMeans));
-            maxRespStim = stimForTrials(maxRespIndex,:);
-            allMaxResp = dfofAllMeans(find(stimForTrials(:,1) == maxRespStim(1) & stimForTrials(:,2) == maxRespStim(2) & stimForTrials(:,3) == maxRespStim(3)));
-            allBlankResp = dfofAllMeans(find(stimForTrials(:,1) == 500));
-
-            [t, p_ttest] = ttest2(allMaxResp,allBlankResp);
-
-            % Sort based on stimulus parameters
-            dfofMeanParam = sortrows(dfofMeanParam,2);
-
-            % Now exclude blanks
-%             nonBlankTrials = find(dfofMeanParam(:,2) < 500);
-%             dfofMeanTrials = dfofMeanParam(nonBlankTrials,:);
-
-            % Now perform one-way ANOVA on the data
-        %     [p, anovatab, stats] = anova1(dfofMeanTrials(:,1),dfofMeanTrials(:,2),'off');
-
-            [p_anova, anovatab, stats] = anova1(dfofMeanParam(:,1),dfofMeanParam(:,2),'off');
-
-            % Store the p-values in the matrix
-            respCellMat(i,2) = p_ttest;
-            respCellMat(i,3) = p_anova;
-
-            nStimParams = unique(trialStim, 'rows');
-
-            meanRespVals = nan(length(nStimParams),4);
-
-            % Get all the mean dfof responses for each stimulus combination
-            % and average them together and store the mean value and direction in a
-            % matrix
-            for j = 1:length(nStimParams)
-                tmpVals = dfofMeanParam(find(dfofMeanParam(:,2) == nStimParams(j,1) & dfofMeanParam(:,3) == nStimParams(j,2) & dfofMeanParam(:,4) == nStimParams(j,3)),:);
-                tmpMeanResp = mean(tmpVals(:,1));
-                meanRespVals(j,1) = tmpMeanResp;
-                meanRespVals(j,2) = nStimParams(j,1);
-                meanRespVals(j,3) = nStimParams(j,2);
-                meanRespVals(j,4) = nStimParams(j,3);
-            end
-
-            % Find the direction with the maximum mean dfof value
-            maxIndex = find(meanRespVals(:,1) == max(meanRespVals(:,1)));
-
-            % Store the max mean dfof values and the corresponding direction in the
-            % matrix
-            respCellMat(i,5) = meanRespVals(maxIndex,1);
-            respCellMat(i,6) = meanRespVals(maxIndex,2);
-            respCellMat(i,7) = meanRespVals(maxIndex,3);
-            respCellMat(i,8) = meanRespVals(maxIndex,4);
-            
+        if ~exist('cells','var')
+            cell_idx = length(tuning);
+%             disp('Using tuning variable')
+            cells = (1:1:length(tuning));
+        else
+            cell_idx = length(cells);
+%             disp('Using cells variable')
         end
-    catch
-        warning('Could not compute anovas likely because there were no trials that occured during the specified behavior.');        
-        i
-    end
-      
-% Finally, some ROIs with extremely high dF/Fs due to division by a very
-% small baseline were eliminated by removing any ROIs that had a trial dF/F
-% that exceeded the median maximum trial dF/F per ROI + the 95% percentile
-% maximum trial dF/F per ROI    
-    
-    try
-        % Calculate d' for cells
+        % Create structure to hold output of the function
+        resp_rel_struct(cell_idx) = struct();
+        resp_rel_struct(1).d_prime_mat = [];
+        resp_rel_struct(1).reliable = [];
+        resp_rel_struct(1).responsive = [];
+        resp_rel_struct(1).high_fluorescence = [];
+        resp_rel_struct(1).low_fluorescence = [];
 
-        % Create NaN matrix to hold d' values for each cell
-        dPrimeMat = nan(size(cellIds,1),1);
+        % Get the sf x tf matrix for all directions for the cell being analyzed
 
-        for i = 1:size(cellIds,1)
-            % Get the max dF/F values for all trials
-            cellMaxDfof = squeeze(maxDfofCellTrials(i,trials,:));
-            % Get the median of all the max trial dF/F
-            cellMedianMaxDfof = median(cellMaxDfof);
-            % Get the 95th percntile of the max trial dF/F
-            cellPercentileMaxDfof = prctile(cellMaxDfof,95);
-            % Reliability threshold is median + 95th percentile
-            dfofRelThresh = cellMedianMaxDfof + cellPercentileMaxDfof;
-            % Get mean trial values from all trials for the cell
-            cellMeanDfof = squeeze(meanDfofCellTrials(i,trials,:));
-            % Get the max of the mean trial dfof
-            cellMaxMeanTrialDfof = max(cellMeanDfof);
-            % Compare max of the mean trial dfof to the reliability
-            % threshold
-            if cellMaxMeanTrialDfof > dfofRelThresh
-                respCellMat(i,9) = 0; % not reliable, exceeded threshold
-            elseif cellMaxMeanTrialDfof <= dfofRelThresh
-                respCellMat(i,9) = 1; % reliable, below threshold
-            end
-            % Find the index of the max dF/F
-            prefIndex = find(cellMaxDfof == max(cellMaxDfof));
-            % Get the stimulus parameter (direction) for the preferred stimulus
-            prefStim = stimForTrials(prefIndex,:);
+        sf_tf_field = [file(1:4), file(9:12), '_sf_tf_means'];
+        sf_tf_all_mean_resp_field = [file(1:4), file(9:12), '_sf_tf_all_mean_resp'];
+        sf_tf_blanks_field = [file(1:4), file(9:12), '_blank_means'];
+        sf_tf_max_dfof_field = [file(1:4), file(9:12), '_max_dfof_trials'];
 
-            % If the preferred direction is a blank trial, then the d' has to be
-            % zero and the cell is not reliable (and probably not responsive
-            % either)
-            if prefStim == 500
-                dPrimeMat(i,:) = 0;
+        % Low fluorescence check. This needs to be done after removing the high
+        % fluorscence, unreliable, and unresponsive rois. Otherwise, I think
+        % too many wonky rois are included and none of the rois pass this test.
+
+        % any roi where the max dfof of all its mean responses to all stimulus
+        % combinations was less than the 6% of the maximum mean dfof of all the
+        % rois in the imaging session.
+
+        tmp_low_fluor_data = [];
+        for c = 1:cell_idx
+            idx = cells(c);
+            tmp_low_fluor_data = cat(3,tmp_low_fluor_data,[tuning(1,idx).(sf_tf_field)]);
+        end
+        max_val = max(tmp_low_fluor_data(:));
+        low_fluor = max_val * 0.06;
+        idx_low_fluor = [];
+        for c = 1:cell_idx
+            idx = cells(c);
+            tmp_thresh_data = [tuning(1,idx).(sf_tf_all_mean_resp_field)];
+            max_tmp_data = max(tmp_thresh_data(:));
+            if max_tmp_data < low_fluor
+                idx_low_fluor = [idx_low_fluor, idx];
+                resp_rel_struct(c).low_fluorescence = 1;
+%                 disp('Low fluorescence detected'); % will detect a lot if no previous dfof exclusion has been done
             else
-                % Mean and STD of responses to preferred direction
-                allPrefIndex = find(stimForTrials(:,1) == prefStim(1) & stimForTrials(:,2) == prefStim(2)...
-                    & stimForTrials(:,3) == prefStim(3));
-                dfofTrials = squeeze(dfofCellTrials(i,trials,:));
-                prefRespAll = mean(dfofTrials(allPrefIndex,(fps*preTime+1):(fps*preTime+1) + (fps*stimTime)));
-                prefRespMean = mean(prefRespAll);
-                prefRespStd = std(prefRespAll);
-
-                % Mean and STD of responses to blanks
-                allBlankIndex = find(stimForTrials(:,1) == 500);
-                blankRespAll = mean(dfofTrials(allBlankIndex,(fps*preTime+1):(fps*preTime+1) + (fps*stimTime)));
-                blankRespMean = mean(blankRespAll);
-                blankRespStd = std(blankRespAll);    
-
-                dPrimeMat(i,:) = (prefRespMean - blankRespMean) / sqrt((prefRespStd + blankRespStd)/2);
+                resp_rel_struct(c).low_fluorescence = 0;
             end
         end
 
-        respCellMat(:,4) = dPrimeMat;
+        high_fluor_idx = [];
+
+        roi_rel_mat = zeros(cell_idx,1);
+        roi_resp_mat = zeros(cell_idx,2);
+
+        for c = 1:cell_idx
+    %     for c = 1:5 % for testing
+            idx = cells(c);
+            sf_tf_all_dirs_resp_mat = tuning(idx).(sf_tf_field);
+            sf_tf_all_means_resp = tuning(idx).(sf_tf_all_mean_resp_field);
+            all_blanks = tuning(idx).(sf_tf_blanks_field);
+
+            % High dfof removal
+
+            % roi is removed if it had a single mean trial dfof that exceeded
+            % the median of the maximum dfof for all trials to all stimulus
+            % combinations for the same roi + the 95th percentile of the
+            % maximum mean dfof for all trials for the same roi
+
+            % trial dF/F that exceeded the median maximum trial dF/F per ROI + the
+            % 95% percentile maximum trial dF/F per ROI
+
+            % Get all max dfof values for the cell
+            all_max_dfof = tuning(idx).(sf_tf_max_dfof_field);
+            max_mean_dfof = max(tuning(idx).(sf_tf_all_mean_resp_field)(:)); % all responses excluding blanks
+            median_dfof = median(all_max_dfof);
+            percentile_max_dfof = prctile(all_max_dfof,95);
+            high_dfof_thresh = median_dfof + percentile_max_dfof;
+
+            if max_mean_dfof > high_dfof_thresh
+                high_fluor_idx = [high_fluor_idx, idx];
+                resp_rel_struct(c).high_fluorescence = 1;
+%                 disp('High fluorescence detected')
+            else
+                resp_rel_struct(c).high_fluorescence = 0;
+            end
+
+            % Responsive calculation. One way ANOVA using all repeats of each
+            % stimulus condition and the blanks.
+
+            % Run one way ANOVA using all SF, TF, and direction combinations
+
+            n_stim_conds = size(sf_tf_all_means_resp,1) * size(sf_tf_all_means_resp,2) * size(sf_tf_all_means_resp,3);
+
+            tmp_anova_mat = nan(size(sf_tf_all_means_resp,4),n_stim_conds + 1);
+
+            stim_cond = 1;
+            % Create matrix to run anova such that each column contains all the
+            % responses to one stimulus combination
+            for j = 1:size(sf_tf_all_dirs_resp_mat,1) % sfs
+    %         for j = 1 % for testing
+                for k = 1:size(sf_tf_all_dirs_resp_mat,2) % tfs
+    %             for k = 1 % for testing
+                    for m = 1:size(sf_tf_all_means_resp,3) % directions
+                        tmp_sf_tf_dir_all_resp_mat = squeeze(sf_tf_all_means_resp(j,k,m,:));
+                        tmp_anova_mat(:,stim_cond) = tmp_sf_tf_dir_all_resp_mat;
+                        stim_cond = stim_cond + 1;
+                    end
+                end
+            end
+
+            % Now add blanks
+            for b = 1:length(all_blanks)
+                tmp_anova_mat(b,end) = all_blanks(b);
+            end
+
+            [p_anova, anovatab, stats] = anova1(tmp_anova_mat, [],'off');
+            roi_resp_mat(idx,1) = p_anova;
+            resp_rel_struct(c).responsive = p_anova;
+            if p_anova < 0.05
+                roi_resp_mat(idx,2) = 1;
+%                 disp('Responsive ROI found')
+            else
+                roi_resp_mat(idx,2) = 0;
+            end
+
             
+            % d' calculation. If d' is less than 0.5, cell is scored as
+            % unreliable.
+
+            % Regarding the preferred stimulus, should this just be the maximum
+            % mean dfof of responses to all stimulus conditions, or should DSI
+            % and OSI be calculated find the preferred stimulus? Currently
+            % written to base calculation off of DSI/OSI calculation.
+
+            % Matrix to hold the reliability score for each sf x tf
+            % combination
+            sf_tf_rel_mat = nan(size(squeeze(sf_tf_all_dirs_resp_mat(:,:,1))));
+            
+
+            for j = 1:size(sf_tf_all_dirs_resp_mat,1) % sfs
+    %         for j = 1 % for testing
+                for k = 1:size(sf_tf_all_dirs_resp_mat,2) % tfs
+    %             for k = 1 % for testing
+                    tmp_sf_tf_mat = nan(1,size(sf_tf_all_dirs_resp_mat,3));
+                    for m = 1:size(sf_tf_all_dirs_resp_mat,3) % directions
+                        tmp_sf_tf_mat(1,m) = sf_tf_all_dirs_resp_mat(j,k,m);
+                    end     
+
+                    % Determine how many directions were tested
+                    all_dirs_tested = size(sf_tf_all_dirs_resp_mat,3);
+                    
+                    % Determine how many directions were presented between a preferred
+                    % direction and the opposite direction based on the total number of
+                    % directions presented.
+                    null_shift = length(tmp_sf_tf_mat)/2;
+                    orth_shift = null_shift/2;
+
+                    % Get the preferred response
+                    pref_resp = max(tmp_sf_tf_mat);
+                    pref_idx = find(tmp_sf_tf_mat == max(tmp_sf_tf_mat));
+
+                    % Get the null response
+                    null_shift = circshift(tmp_sf_tf_mat,null_shift);
+                    null_resp = null_shift(pref_idx);
+
+                    if length(all_dirs_tested) > 2
+                        % Get the orthogonal response
+                        orth_shift_one = circshift(tmp_sf_tf_mat,orth_shift);
+                        orth_resp_one = orth_shift_one(pref_idx);
+                        orth_shift_two = circshift(tmp_sf_tf_mat,-orth_shift);
+                        orth_resp_two = orth_shift_two(pref_idx);
+
+                        orth_resp = mean([orth_resp_one,orth_resp_two]);
+                        cell_osi = (pref_resp - orth_resp)/(pref_resp + orth_resp);
+                    else
+                        cell_osi = nan;
+                    end
+
+                    % Calculate DSI and OSI
+                    cell_dsi = (pref_resp - null_resp)/(pref_resp + null_resp);
+
+                    if cell_dsi > 0.4 || cell_osi > 0.2                    
+                        % cell is tuned, use preferred direction for resp/rel
+                        pref_resp_means = squeeze(sf_tf_all_dirs_resp_mat(j,k,pref_idx,:));
+
+                        % calculate d'
+                        d_prime = (mean(pref_resp_means) - mean(all_blanks)) / ...
+                            (std(pref_resp_means) + std(all_blanks));
+
+                        sf_tf_rel_mat(j,k) = d_prime;
+
+                    else                    
+                        % cell is not tuned, take average of all responses
+                        all_resp_means = mean(squeeze(sf_tf_all_dirs_resp_mat(j,k,:,:)));
+
+                        % calculate d'
+                        d_prime = (mean(all_resp_means) - mean(all_blanks)) / ...
+                            (std(all_resp_means) + std(all_blanks));
+
+                        sf_tf_rel_mat(j,k) = d_prime;
+                    end
+                end
+            end
+                        
+            % If any of the responses have a d' greater than 0.5 the roi is
+            % considered reliable. Should this be changed to requiring all of
+            % them? Or the mean of all d' scores for all stimulus conditions?
+            resp_rel_struct(c).d_prime_mat = sf_tf_rel_mat;
+            if ~isempty(find(sf_tf_rel_mat >= 1.0))
+                roi_rel_mat(idx) = 1;
+                resp_rel_struct(c).reliable = 1;
+%                 disp('Reliable ROI found')
+            else
+                resp_rel_struct(c).reliable = 0;
+            end
+        end
         
     catch
-        warning('Could not compute dprime likely because there were no trials that occured during the specified behavior.');
-        cellIds(i)
+        
     end
 end
