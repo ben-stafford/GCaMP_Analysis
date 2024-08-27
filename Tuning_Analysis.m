@@ -2,21 +2,22 @@
 
 clear all
 
-animal_id = '6627';
-experiment_day = 'day2';
+animal_id = '6570';
+experiment_day = 'hab1';
 
 files_to_analyze = {    
-    'day2_000_011_Data.mat';
+    'hab1_000_000_Data.mat';
 %     'day4_000_004_Data.mat';
 };
 
 % Flag to indicate whether to save the data and whether the data is from control or CNO conditions
-save_data = 1;
-cno_data = 1;
+save_data = 0;
+cno_data = 0;
 
 % Flag to indicate whether you want to analyze just stationary trials or
 % all trials
 stationary_trials = 1;
+responsive_thresh = 0.05;
 
 % Path to data
 
@@ -270,7 +271,7 @@ for f = 1:length(files_to_analyze)
     file = files_to_analyze{f};
     resp_rel_struct = getResponsiveReliableMetrics_2024(file,tuning);
 %     all_resp_rel(f).resp_rel_struct = resp_rel_struct;
-    resp_idx = find([resp_rel_struct(1,:).responsive] < 0.01); % responsive
+    resp_idx = find([resp_rel_struct(1,:).responsive] < responsive_thresh); % responsive
     rel_idx = find([resp_rel_struct(1,:).reliable] == 1); % reliable
     good_roi_idx = intersect(resp_idx,rel_idx); % responsive and reliable
     high_idx = find([resp_rel_struct(1,:).high_fluorescence] == 0); % did not have high fluorscence
