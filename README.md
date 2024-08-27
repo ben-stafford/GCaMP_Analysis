@@ -27,8 +27,8 @@ Experiment_Name/Recording_Day/Spike2_Files
 Variable Names:
 
 When you run Suite2P_Analysis_Batch.m, you specify the location of the files by providing the names of the directories where they are located using the following variables:
-1) experiment_name: the name of the experiment which is typically the mouse ear tag number.
-2) recording_day: typically day1, day2, day3, etc.
+1) animal_id: the name of the animal which is typically the mouse ear tag number.
+2) experiment_day: typically day1, day2, day3, etc.
 3) suite2pDir: the path where the Suite2P mat file is located
 4) scanboxDir: the path where the Scanbox_Files are located
 
@@ -51,7 +51,7 @@ Tuning_Analysis.m
 This code takes the output files from Suite2P_Analysis_Batch.m and calculates numerous parameters for each ROI. It also allows you to analyze more than one output file at a time. This is required for stimulus sets that were collected over the course of two or more experiments. For example, when analyzing SF and TF tuning, two different experiments are typically run, each of which covers half of the SFs, TFs, and directions. In order to calculate the SF and TF tuning of each ROI, two files must loaded and analyzed sequentially.
 
 When you run Tuning_Analysis.m, you specify the location of the files by providing the names and paths to them using the following variables:
-1) animal_id: the name of the animal/experiment, typically the animal's ear tag number.
+1) animal_id: the name of the animal which is typically the animal's ear tag number.
 2) experiment_day: typically day1, day2, day3, etc.
 3) files_to_analyze: a list of the matlab files to open and analyze. These are the output files from Suite2P_Analysis_Batch.m and will have names like: day1_000_000_Data.mat, day1_000_001_Data.mat; day1_000_002_Data.mat, etc.
 4) analysisDir: the path where the files specified in files_to_analyze are located. This is typically animal_id/experiment_day/Analysis
