@@ -88,5 +88,3 @@ There is aso one flag (compare) that should not be changed at the moment. Leave 
 Output:
 
 Depending on the type of the experiments being analyzed, the code will either produce different plots. If you are anlyzing a SF and TF tuning set of experiments, plots of the preferred SF, TF, and TF/SF ratio in control and CNO conditions will be generated. If you are analyzing a DS and OS tunign experiment, plots of the DSI and OSI in control and CNO conditions will be generated.
-
-heatmap of the average response of all rois to the range of SFs and TFs wil be generated. If you are analyzing a DS and OS experiment, a plot of the mean +/- sem DSI and OSI, as well as a histogram of the preferred direction for all rois will be generated.
