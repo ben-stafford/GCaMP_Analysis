@@ -26,7 +26,7 @@ Experiment_Name/Recording_Day/Spike2_Files
 
 Variable Names:
 
-When you run Suite2P_Analysis_Batch.m, you specify the location of the files by providing the names of the directories where they are located using the following variables:
+When you run Suite2P_Analysis_Batch.m, you manually specify the location of the files by providing the names of the directories where they are located using the following variables:
 1) animal_id: the name of the animal which is typically the mouse ear tag number.
 2) experiment_day: typically day1, day2, day3, etc.
 3) suite2pDir: the path where the Suite2P mat file is located
@@ -50,7 +50,7 @@ Tuning_Analysis.m
 
 This code takes the output files from Suite2P_Analysis_Batch.m and calculates numerous parameters for each ROI. It also allows you to analyze more than one output file at a time. This is required for stimulus sets that were collected over the course of two or more experiments. For example, when analyzing SF and TF tuning, two different experiments are typically run, each of which covers half of the SFs, TFs, and directions required for this analysis. In order to calculate the SF and TF tuning of each ROI, two files must loaded and analyzed sequentially. The code should be robust enough to determine how many SFs, TFs, and directions were used in the experiments and analyze them accoridngly. However, it is important that you only analyze data from one 'set' of experiments at a time. For example, don't try to analyze an experiment with multiple SFs, TFs, and directions (a SF and TF tuning experiment) with an experiment with one SF, one TF, and multiple directions (a DS and OS experiment).
 
-When you run Tuning_Analysis.m, you specify the location of the files by providing the names and paths to them using the following variables:
+When you run Tuning_Analysis.m, you manually specify the location and names of the files to be anlyzed using the following variables:
 1) animal_id: the name of the animal which is typically the animal's ear tag number.
 2) experiment_day: typically day1, day2, day3, etc.
 3) files_to_analyze: a list of the matlab files to open and analyze. These are the output files from Suite2P_Analysis_Batch.m and will have names like: day1_000_000_Data.mat, day1_000_001_Data.mat; day1_000_002_Data.mat, etc.
@@ -69,7 +69,7 @@ When save_data = 1, the code saves data structures in mat files. The names of th
 
 day1_000_control.mat
 
-If two file are analyzed, the output file will have a name like:
+If two files are analyzed, the output file will have a name like:
 
 day1_000_002_control.mat
 
@@ -77,7 +77,7 @@ Control_CNO_Compare_Compile.m
 
 This code is still a work in progress, but is fully functional for comparing one control dataset against one CNO dataset. This code will load the output files from Tuning_Analysis.m and compare various parameters between control and CNO conditions. It is robust enough to determine whether the underlying experiments were probing SF and TF tuning or DS and OS of the ROIs. Currently, you can only input one control file and one CNO file. It should go without saying, the control and CNO files should be the same type of experiemnt (i.e. don't compare a control SF and TF tuning experiment with a CNO DS and OS tuning experiment.
 
-When you run Control_CNO_Compare_Compile.m there are four variables you must manually set:
+When you run Control_CNO_Compare_Compile.m there are four variables you must manually set that provide the location and names of the files to be analyzed:
 1) animal_ids: a list of animal names which are typically the mouse ear tag number. Currently, these have to be the same.
 2) experiment_days: a list of experiment days (i.e. day1). Currently, these have to be the same.
 3) files_to_compare: a list of files to compare. The first file should be the control data (eg. day1_000_001_control.mat) and the second should be the CNO data (eg. day1_002_003_cno.mat).
