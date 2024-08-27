@@ -25,6 +25,8 @@ For example, the scanbox files would be located at:
 
 Experiment_Name/Recording_Day/Scanbox_Files/
 
+Variable Names:
+
 In the Matlab file you specify the location of the files by providing the names of the directories where to they are located using the following variables:
 1) experiment_name (typically the mouse ID number; eg. 6627)
 2) recording_day (eg. day1, day2, day3, etc.)
@@ -34,6 +36,8 @@ There are three 'flags' representing analysis steps you can 'turn on' by setting
 2) smoothTraces - when set to 1, this will smooth the fluoresence traces
 3) subtractNeuropil - when set to 1, this will subtract the neuropil signal from the fluorescence traces
 4) photoBleachSubtract - when set to 1, this will use the interleaved blank trials to fit the background fluorescnce decay with a polynomial and subtract from the fluorescence traces to try to linearize the dfof trace.
+
+Output:
 
 The code saves data structures in mat files for each experiment/file used from the Scanbox_Files directory in the following location:
 
