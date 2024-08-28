@@ -72,7 +72,7 @@ There are also five flags you can set that impact how the analysis is run and wh
 
 Output:
 
-Depending on the experiments being analyzed, the code will either produce different plots. If you are analyzing a SF and TF tuning set of experiments, a heatmap of the average response of all rois to the range of SFs and TFs wil be generated. If you are analyzing a DS and OS experiment, a plot of the mean +/- sem DSI and OSI, as well as a histogram of the preferred direction for all rois will be generated.
+Depending on the experiments being analyzed, the code will produce different plots. If you are analyzing a SF and TF tuning set of experiments, a heatmap of the average response of all rois to the range of SFs and TFs wil be generated. If you are analyzing a DS and OS experiment, a plot of the mean +/- sem DSI and OSI, as well as a histogram of the preferred direction for all rois will be generated.
 
 When save_data = 1, the code saves data structures in mat files. The names of these output files depend on how many files were included in files_to_analyze. For each file analyzed, the code extracts the second set of three numbers in the file name (these correspond to the experiment number) and includes it in the file name. If only one file is analyzed, the output file will have a name like:
 
