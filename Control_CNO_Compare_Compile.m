@@ -6,22 +6,18 @@ clear all
 compare = 1;
 
     animal_ids = {
-        '6627'
-        '6627'
+        '6510'
+        '6510'
         };
         
     experiment_days = {
-%         'day4'
-%         'day4'
-        'day2'
-        'day2'
+        'day1'
+        'day1'
         };
 
     files_to_compare = {
-%         'day4_000_001_control.mat'
-%         'day4_004_005_cno.mat'
-        'day2_004_control.mat'
-        'day2_011_cno.mat'
+        'day1_000_control.mat'
+        'day1_005_cno.mat'
         };
 
 if compare % comparing datasets
@@ -258,66 +254,66 @@ if compare % comparing datasets
 
         % Make some histograms of the SF and TF
         % SF
+        sorted_sfs = unique(sort(all_sfs));
         figure(3); clf;
         subplot(1,3,1); hold on;
-        histogram(log2(all_control_sf),4,...
-            'BinEdges',[log2(0.01)-0.5:1:log2(0.08)+0.5],...
+        histogram(log2(all_control_sf),length(sorted_sfs),...
+            'BinEdges',[log2(sorted_sfs(1))-0.5:1:log2(sorted_sfs(end))+0.5],...
             'Normalization','probability', ...
             'DisplayStyle','stairs', 'LineWidth', 1.5, 'EdgeColor', [0 0 0]);
         plot(nanmean(log2(all_control_sf)), 0.5, 'v', 'MarkerSize', 5, 'Color', [0 0 0], 'MarkerFaceColor', [0 0 0]);
-        histogram(log2(all_cno_sf),4,...
-            'BinEdges',[log2(0.01)-0.5:1:log2(0.08)+0.5],...
+        histogram(log2(all_cno_sf),length(sorted_sfs),...
+            'BinEdges',[log2(sorted_sfs(1))-0.5:1:log2(sorted_sfs(end))+0.5],...
             'Normalization','probability', ...
             'DisplayStyle','stairs', 'LineWidth', 1.5, 'EdgeColor', [1 0 0]);
         plot(nanmean(log2(all_cno_sf)), 0.5, 'v', 'MarkerSize', 5, 'Color', [1 0 0], 'MarkerFaceColor', [1 0 0]);
         xlabel('preferred SF');
         ylabel('proportion');
-        ylim([0 0.5]);
-        xlim([log2(0.01)-0.75 log2(0.08)+0.75]);
-        xticks(log2([0.01 0.02 0.04 0.08]));
-        xticklabels(([0.01 0.02 0.04 0.08]));
-        yticks([0:0.1:0.5]);
+        ylim([0 1.0]);
+        xlim([log2(sorted_sfs(1))-0.75 log2(sorted_sfs(end))+0.75]);
+        xticks(log2([sorted_sfs]));
+        xticklabels(([sorted_sfs]));
 
 
         % TF
+        sorted_tfs = unique(sort(all_tfs));
         subplot(1,3,2); hold on;
         histogram(log2(60./all_control_tf),4,...
-            'BinEdges',[log2(1)-0.5:1:log2(8)+0.5],...
+            'BinEdges',[log2(sorted_tfs(1))-0.5:1:log2(sorted_tfs(end))+0.5],...
             'Normalization','probability', ...
             'DisplayStyle','stairs', 'LineWidth', 1.5, 'EdgeColor', [0 0 0]);
         plot(nanmean(log2(60./all_control_tf)), 0.5, 'v', 'MarkerSize', 5,  'Color', [0 0 0], 'MarkerFaceColor', [0 0 0]);
         histogram(log2(60./all_cno_tf),4,...
-            'BinEdges',[log2(1)-0.5:1:log2(8)+0.5],...
+            'BinEdges',[log2(sorted_tfs(1))-0.5:1:log2(sorted_tfs(end))+0.5],...
             'Normalization','probability', ...
             'DisplayStyle','stairs', 'LineWidth', 1.5, 'EdgeColor', [1 0 0]);
         plot(nanmean(log2(60./all_cno_tf)), 0.5, 'v', 'MarkerSize', 5,  'Color', [1 0 0], 'MarkerFaceColor', [1 0 0]);
         xlabel('preferred TF');
         ylabel('proportion');
-        ylim([0 0.5]);
-        xlim([log2(1)-0.75 log2(8)+0.75]);
-        xticks(log2([1 2 4 8]));
-        xticklabels(([1 2 4 8]));
-        yticks([0:0.1:0.5]);
+        ylim([0 1.0]);
+        xlim([log2(sorted_tfs(1))-0.75 log2(sorted_tfs(end))+0.75]);
+        xticks(log2([sorted_tfs]));
+        xticklabels(([sorted_tfs]));
 
         % TF/SF (approximation of cell's speed tuning)
+        tf_over_sf = unique(sort(all_tfs./all_sfs));
         subplot(1,3,3); hold on;
-        histogram(log2(tf_sf_control),8,...
-            'BinEdges',[log2(12.5)-0.5:1:log2(800)+0.5],...
+        histogram(log2(tf_sf_control),length(tf_over_sf),...
+            'BinEdges',[log2(tf_over_sf(1))-0.5:1:log2(tf_over_sf(end))+0.5],...
             'Normalization','probability', ...
             'DisplayStyle','stairs', 'LineWidth', 1.5, 'EdgeColor', [0 0 0]);
         plot(nanmean(log2(tf_sf_control)), 0.5, 'v', 'MarkerSize', 5,  'Color', [0 0 0], 'MarkerFaceColor', [0 0 0]);
-        histogram(log2(tf_sf_cno),8,...
-            'BinEdges',[log2(12.5)-0.5:1:log2(800)+0.5],...
+        histogram(log2(tf_sf_cno),length(tf_over_sf),...
+            'BinEdges',[log2(tf_over_sf(1))-0.5:1:log2(tf_over_sf(end))+0.5],...
             'Normalization','probability', ...
             'DisplayStyle','stairs', 'LineWidth', 1.5, 'EdgeColor', [1 0 0]);
         plot(nanmean(log2(tf_sf_cno)), 0.5, 'v', 'MarkerSize', 5,  'Color', [1 0 0], 'MarkerFaceColor', [1 0 0]);
         xlabel('preferred TF/SF (º/s)');
         ylabel('proportion');
-        ylim([0 0.5]);
-        xlim([log2(12.5)-0.75 log2(800)+0.75]);
-        xticks(log2(12.5):1:log2(800));
-        xticklabels(2.^(log2(12.5):1:log2(800)));
-        yticks([0:0.1:0.5]);
+        ylim([0 1.0]);
+        xlim([log2(tf_over_sf(1))-0.75 log2(tf_over_sf(end))+0.75]);
+        xticks(log2(tf_over_sf(1)):1:log2(tf_over_sf(end)));
+        xticklabels(2.^(log2(tf_over_sf(1)):1:log2(tf_over_sf(end))));
 
         % Make a 2D histogram of cells in control vs CNO
         figure(4); clf; hold on;
@@ -333,6 +329,352 @@ if compare % comparing datasets
         xlabel('preferred SF (control)');
         yticklabels([0.01 0.02 0.04 0.08]);
         ylabel('preferred SF (CNO)');
+    elseif size(cont_sf_tf_mat,1) == 1 && size(cont_sf_tf_mat,2) > 1
+        % Make some plots of control vs cno data
+        figure(1); clf;
+        % sf data
+        all_control_sf = [cont_cno_sf_tf_struct(1,:).control_sf];
+        all_cno_sf = [cont_cno_sf_tf_struct(1,:).cno_sf];
+        mean_control_sf = mean(all_control_sf);
+        sem_control_sf = sem(all_control_sf);
+        mean_cno_sf = mean(all_cno_sf);
+        sem_cno_sf = sem(all_cno_sf);
+
+        % tf data
+        all_control_tf = [cont_cno_sf_tf_struct(1,:).control_tf];
+        all_cno_tf = [cont_cno_sf_tf_struct(1,:).cno_tf];
+        mean_control_tf = nanmean(60./all_control_tf);
+        sem_control_tf = nansem(60./all_control_tf);
+        mean_cno_tf = nanmean(60./all_cno_tf);
+        sem_cno_tf = nansem(60./all_cno_tf);
+
+        % tf/sf data
+        tf_sf_control = (60./all_control_tf)./all_control_sf;
+        tf_sf_cno = (60./all_cno_tf)./all_cno_sf;
+        mean_tf_sf_control = nanmean(tf_sf_control);
+        sem_tf_sf_control = nansem(tf_sf_control);
+        mean_tf_sf_cno = nanmean(tf_sf_cno);
+        sem_tf_sf_cno = nansem(tf_sf_cno);
+
+        % all tf/sf ratios in case they are needed
+        all_sfs = squeeze(control_stim_cond(:,:,1,1));
+        all_tfs = 60./squeeze(control_stim_cond(:,:,1,2));
+        tf_sf_ratios = unique(all_tfs./all_sfs);
+
+        subplot(1,3,1); hold on;    
+        plot(zeros(length(all_control_sf)), all_control_sf(:),'ko','Markersize',5);
+        plot(ones(length(all_cno_sf))*0.5, all_cno_sf(:),'ro','Markersize',5);
+        for i=1:length(all_control_sf)
+            plot([0 0.5],[all_control_sf(i) all_cno_sf(i)], 'k-');
+        end
+        plot(0,mean_control_sf,'ko','Linewidth',1.5,'Markersize',5);
+        plot(0.5,mean_cno_sf,'ro','Linewidth',1.5,'Markersize',5);
+        errorbar(0,mean_control_sf,sem_control_sf,'k-','Linewidth',1.5);
+        errorbar(0.5,mean_cno_sf,sem_cno_sf,'r-',  'Linewidth', 1.5);
+        yl(0,0.1);
+        xl(-0.5,1.0);
+        xticks([0,0.5]);
+        xticklabels({'Control'; 'CNO'});
+        ylabel('preferred SF');
+
+        subplot(1,3,2); hold on;    
+        plot(zeros(length(all_control_tf)), (60./all_control_tf),'ko','Markersize',5);
+        plot(ones(length(all_cno_tf))*0.5, (60./all_cno_tf),'ro','Markersize',5);
+        for i=1:length(all_control_tf)
+            plot([0 0.5],[(60/all_control_tf(i)) (60/all_cno_tf(i))], 'k-');
+        end
+        plot(0,mean_control_tf,'ko','Linewidth',1.5,'Markersize',5);
+        plot(0.5,mean_cno_tf,'ro','Linewidth',1.5,'Markersize',5);
+        errorbar(0,mean_control_tf,sem_control_tf,'k-','Linewidth',1.5);
+        errorbar(0.5,mean_cno_tf,sem_cno_tf,'r-',  'Linewidth', 1.5);
+        yl(0,10);
+        xl(-0.5,1.0);
+        xticks([0,0.5]);
+        xticklabels({'Control'; 'CNO'});
+        ylabel('preferred TF');
+
+        subplot(1,3,3); hold on;    
+        plot(zeros(length(tf_sf_control)), tf_sf_control(:),'ko','Markersize',5);
+        plot(ones(length(tf_sf_cno))*0.5, tf_sf_cno(:),'ro','Markersize',5);
+        for i=1:length(tf_sf_control)
+            plot([0 0.5],[tf_sf_control(i) tf_sf_cno(i)], 'k-');
+        end
+        plot(0,mean_tf_sf_control,'ko','Linewidth',1.5,'Markersize',5);
+        plot(0.5,mean_tf_sf_cno,'ro','Linewidth',1.5,'Markersize',5);
+        errorbar(0,mean_tf_sf_control,sem_tf_sf_control,'k-','Linewidth',1.5);
+        errorbar(0.5,mean_tf_sf_cno,sem_tf_sf_cno,'r-',  'Linewidth', 1.5);
+        yl(0,900);
+        xl(-0.5,1.0);
+        xticks([0,0.5]);
+        xticklabels({'Control'; 'CNO'});
+        ylabel('preferred TF/SF (º/s)');
+
+        % Make some plots of control vs cno data
+        figure(2); clf;
+        all_control_dsi = [cont_cno_sf_tf_struct(1,:).control_dsi];
+        all_cno_dsi = [cont_cno_sf_tf_struct(1,:).cno_dsi];
+        all_control_osi = [cont_cno_sf_tf_struct(1,:).control_osi];
+        all_cno_osi = [cont_cno_sf_tf_struct(1,:).cno_osi];
+        all_control_dir = [cont_cno_sf_tf_struct(1,:).control_dir];
+        all_cno_dir = [cont_cno_sf_tf_struct(1,:).cno_dir];
+        
+        subplot(1,2,1); hold on;    
+        plot(zeros(length(all_control_dsi)), all_control_dsi(:),'ko','Markersize',5);
+        plot(ones(length(all_cno_dsi))*0.5, all_cno_dsi(:),'ro','Markersize',5);
+        for i=1:length(all_control_dsi)
+            plot([0 0.5],[all_control_dsi(i) all_cno_dsi(i)], 'k-');
+        end
+        plot(0,nanmean(all_control_dsi),'ko','Linewidth',1.5,'Markersize',5);
+        plot(0.5,nanmean(all_cno_dsi),'ro','Linewidth',1.5,'Markersize',5);
+        errorbar(0,nanmean(all_control_dsi),nansem(all_control_dsi),'k-','Linewidth',1.5);
+        errorbar(0.5,nanmean(all_cno_dsi),nansem(all_cno_dsi),'r-',  'Linewidth', 1.5);
+        yl(-1.0,5.0);
+        xl(-0.5,1.0);
+        xticks([0,0.5]);
+        xticklabels({'Control'; 'CNO'});
+        ylabel('DSI');
+        
+        subplot(1,2,2); hold on;    
+        plot(zeros(length(all_control_osi)), all_control_osi(:),'ko','Markersize',5);
+        plot(ones(length(all_cno_osi))*0.5, all_cno_osi(:),'ro','Markersize',5);
+        for i=1:length(all_control_osi)
+            plot([0 0.5],[all_control_osi(i) all_cno_osi(i)], 'k-');
+        end
+        plot(0,nanmean(all_control_osi),'ko','Linewidth',1.5,'Markersize',5);
+        plot(0.5,nanmean(all_cno_osi),'ro','Linewidth',1.5,'Markersize',5);
+        errorbar(0,nanmean(all_control_osi),nansem(all_control_osi),'k-','Linewidth',1.5);
+        errorbar(0.5,nanmean(all_cno_osi),nansem(all_cno_osi),'r-',  'Linewidth', 1.5);
+        yl(0,5.0);
+        xl(-0.5,1.0);
+        xticks([0,0.5]);
+        xticklabels({'Control'; 'CNO'});
+        ylabel('OSI');
+        
+
+        % Make some histograms of the SF and TF
+        % No SF histogram, because there is only one SF being tested
+        % TF
+        sorted_tfs = sort(all_tfs);
+        subplot(1,3,2); hold on;
+        histogram(log2(60./all_control_tf),length(sorted_tfs),...
+            'BinEdges',[log2(sorted_tfs(1))-0.5:1:log2(sorted_tfs(end))+0.5],...
+            'Normalization','probability', ...
+            'DisplayStyle','stairs', 'LineWidth', 1.5, 'EdgeColor', [0 0 0]);
+        plot(nanmean(log2(60./all_control_tf)), 0.5, 'v', 'MarkerSize', 5,  'Color', [0 0 0], 'MarkerFaceColor', [0 0 0]);
+        histogram(log2(60./all_cno_tf),length(sorted_tfs),...
+            'BinEdges',[log2(sorted_tfs(1))-0.5:1:log2(sorted_tfs(end))+0.5],...
+            'Normalization','probability', ...
+            'DisplayStyle','stairs', 'LineWidth', 1.5, 'EdgeColor', [1 0 0]);
+        plot(nanmean(log2(60./all_cno_tf)), 0.5, 'v', 'MarkerSize', 5,  'Color', [1 0 0], 'MarkerFaceColor', [1 0 0]);
+        xlabel('preferred TF');
+        ylabel('proportion');
+        ylim([0 1.0]);
+        xlim([log2(sorted_tfs(1))-0.75 log2(sorted_tfs(end))+0.75]);
+        xticks(log2([sorted_tfs]));
+        xticklabels(([sorted_tfs]));
+        yticks([0:0.1:0.5]);
+
+        % TF/SF (approximation of cell's speed tuning)
+        tf_over_sf = unique(sort(all_tfs./all_sfs));
+        subplot(1,3,3); hold on;
+        histogram(log2(tf_sf_control),length(tf_over_sf),...
+            'BinEdges',[log2(tf_over_sf(1))-0.5:1:log2(tf_over_sf(end))+0.5],...
+            'Normalization','probability', ...
+            'DisplayStyle','stairs', 'LineWidth', 1.5, 'EdgeColor', [0 0 0]);
+        plot(nanmean(log2(tf_sf_control)), 0.5, 'v', 'MarkerSize', 5,  'Color', [0 0 0], 'MarkerFaceColor', [0 0 0]);
+        histogram(log2(tf_sf_cno),length(tf_over_sf),...
+            'BinEdges',[log2(tf_over_sf(1))-0.5:1:log2(tf_over_sf(end))+0.5],...
+            'Normalization','probability', ...
+            'DisplayStyle','stairs', 'LineWidth', 1.5, 'EdgeColor', [1 0 0]);
+        plot(nanmean(log2(tf_sf_cno)), 0.5, 'v', 'MarkerSize', 5,  'Color', [1 0 0], 'MarkerFaceColor', [1 0 0]);
+        xlabel('preferred TF/SF (º/s)');
+        ylabel('proportion');
+        ylim([0 1.0]);
+        xlim([log2(tf_over_sf(1))-0.75 log2(tf_over_sf(end))+0.75]);
+        xticks(log2(tf_over_sf(1)):1:log2(tf_over_sf(end)));
+        xticklabels(2.^(log2(tf_over_sf(1)):1:log2(tf_over_sf(end))));
+
+%         % Make a 2D histogram of cells in control vs CNO
+%         figure(4); clf; hold on;
+%         edges = [0 0.015 0.025 0.045 0.085]; % set the bin edges (sfs)
+%         cell_counts = histcounts2(all_cno_sf,all_control_sf,edges,edges); % matrix of sf combinations
+%         x = reshape(repmat((1:4)', 4, 1),1,[]); % x values for plotting
+%         y = reshape(repmat(1:4, 4, 1),1,[]); % y values for plotting
+%         cell_counts_reshaped = reshape(flip(cell_counts)',1,[]); % convert cell count matrix to vector
+%         scatter(x,y,cell_counts_reshaped*300,'Facecolor','k');
+%         plot([0 5],[0 5],'k--');
+%         xticks(1:1:4); yticks(1:1:4);
+%         xticklabels([0.01 0.02 0.04 0.08]);
+%         xlabel('preferred SF (control)');
+%         yticklabels([0.01 0.02 0.04 0.08]);
+%         ylabel('preferred SF (CNO)');
+    elseif size(cont_sf_tf_mat,1) > 1 && size(cont_sf_tf_mat,2) == 1
+        % Make some plots of control vs cno data
+        figure(1); clf;
+        % sf data
+        all_control_sf = [cont_cno_sf_tf_struct(1,:).control_sf];
+        all_cno_sf = [cont_cno_sf_tf_struct(1,:).cno_sf];
+        mean_control_sf = mean(all_control_sf);
+        sem_control_sf = sem(all_control_sf);
+        mean_cno_sf = mean(all_cno_sf);
+        sem_cno_sf = sem(all_cno_sf);
+
+        % tf data
+        all_control_tf = [cont_cno_sf_tf_struct(1,:).control_tf];
+        all_cno_tf = [cont_cno_sf_tf_struct(1,:).cno_tf];
+        mean_control_tf = nanmean(60./all_control_tf);
+        sem_control_tf = nansem(60./all_control_tf);
+        mean_cno_tf = nanmean(60./all_cno_tf);
+        sem_cno_tf = nansem(60./all_cno_tf);
+
+        % tf/sf data
+        tf_sf_control = (60./all_control_tf)./all_control_sf;
+        tf_sf_cno = (60./all_cno_tf)./all_cno_sf;
+        mean_tf_sf_control = nanmean(tf_sf_control);
+        sem_tf_sf_control = nansem(tf_sf_control);
+        mean_tf_sf_cno = nanmean(tf_sf_cno);
+        sem_tf_sf_cno = nansem(tf_sf_cno);
+
+        % all tf/sf ratios in case they are needed
+        all_sfs = squeeze(control_stim_cond(:,:,1,1));
+        all_tfs = 60./squeeze(control_stim_cond(:,:,1,2));
+        tf_sf_ratios = unique(all_tfs./all_sfs);
+
+        subplot(1,3,1); hold on;    
+        plot(zeros(length(all_control_sf)), all_control_sf(:),'ko','Markersize',5);
+        plot(ones(length(all_cno_sf))*0.5, all_cno_sf(:),'ro','Markersize',5);
+        for i=1:length(all_control_sf)
+            plot([0 0.5],[all_control_sf(i) all_cno_sf(i)], 'k-');
+        end
+        plot(0,mean_control_sf,'ko','Linewidth',1.5,'Markersize',5);
+        plot(0.5,mean_cno_sf,'ro','Linewidth',1.5,'Markersize',5);
+        errorbar(0,mean_control_sf,sem_control_sf,'k-','Linewidth',1.5);
+        errorbar(0.5,mean_cno_sf,sem_cno_sf,'r-',  'Linewidth', 1.5);
+        yl(0,0.1);
+        xl(-0.5,1.0);
+        xticks([0,0.5]);
+        xticklabels({'Control'; 'CNO'});
+        ylabel('preferred SF');
+
+        subplot(1,3,2); hold on;    
+        plot(zeros(length(all_control_tf)), (60./all_control_tf),'ko','Markersize',5);
+        plot(ones(length(all_cno_tf))*0.5, (60./all_cno_tf),'ro','Markersize',5);
+        for i=1:length(all_control_tf)
+            plot([0 0.5],[(60/all_control_tf(i)) (60/all_cno_tf(i))], 'k-');
+        end
+        plot(0,mean_control_tf,'ko','Linewidth',1.5,'Markersize',5);
+        plot(0.5,mean_cno_tf,'ro','Linewidth',1.5,'Markersize',5);
+        errorbar(0,mean_control_tf,sem_control_tf,'k-','Linewidth',1.5);
+        errorbar(0.5,mean_cno_tf,sem_cno_tf,'r-',  'Linewidth', 1.5);
+        yl(0,10);
+        xl(-0.5,1.0);
+        xticks([0,0.5]);
+        xticklabels({'Control'; 'CNO'});
+        ylabel('preferred TF');
+
+        subplot(1,3,3); hold on;    
+        plot(zeros(length(tf_sf_control)), tf_sf_control(:),'ko','Markersize',5);
+        plot(ones(length(tf_sf_cno))*0.5, tf_sf_cno(:),'ro','Markersize',5);
+        for i=1:length(tf_sf_control)
+            plot([0 0.5],[tf_sf_control(i) tf_sf_cno(i)], 'k-');
+        end
+        plot(0,mean_tf_sf_control,'ko','Linewidth',1.5,'Markersize',5);
+        plot(0.5,mean_tf_sf_cno,'ro','Linewidth',1.5,'Markersize',5);
+        errorbar(0,mean_tf_sf_control,sem_tf_sf_control,'k-','Linewidth',1.5);
+        errorbar(0.5,mean_tf_sf_cno,sem_tf_sf_cno,'r-',  'Linewidth', 1.5);
+        yl(0,900);
+        xl(-0.5,1.0);
+        xticks([0,0.5]);
+        xticklabels({'Control'; 'CNO'});
+        ylabel('preferred TF/SF (º/s)');
+
+        % Make some plots of control vs cno data
+        figure(2); clf;
+        all_control_dsi = [cont_cno_sf_tf_struct(1,:).control_dsi];
+        all_cno_dsi = [cont_cno_sf_tf_struct(1,:).cno_dsi];
+        all_control_osi = [cont_cno_sf_tf_struct(1,:).control_osi];
+        all_cno_osi = [cont_cno_sf_tf_struct(1,:).cno_osi];
+        all_control_dir = [cont_cno_sf_tf_struct(1,:).control_dir];
+        all_cno_dir = [cont_cno_sf_tf_struct(1,:).cno_dir];
+        
+        subplot(1,2,1); hold on;    
+        plot(zeros(length(all_control_dsi)), all_control_dsi(:),'ko','Markersize',5);
+        plot(ones(length(all_cno_dsi))*0.5, all_cno_dsi(:),'ro','Markersize',5);
+        for i=1:length(all_control_dsi)
+            plot([0 0.5],[all_control_dsi(i) all_cno_dsi(i)], 'k-');
+        end
+        plot(0,nanmean(all_control_dsi),'ko','Linewidth',1.5,'Markersize',5);
+        plot(0.5,nanmean(all_cno_dsi),'ro','Linewidth',1.5,'Markersize',5);
+        errorbar(0,nanmean(all_control_dsi),nansem(all_control_dsi),'k-','Linewidth',1.5);
+        errorbar(0.5,nanmean(all_cno_dsi),nansem(all_cno_dsi),'r-',  'Linewidth', 1.5);
+        yl(-1.0,5.0);
+        xl(-0.5,1.0);
+        xticks([0,0.5]);
+        xticklabels({'Control'; 'CNO'});
+        ylabel('DSI');
+        
+        subplot(1,2,2); hold on;    
+        plot(zeros(length(all_control_osi)), all_control_osi(:),'ko','Markersize',5);
+        plot(ones(length(all_cno_osi))*0.5, all_cno_osi(:),'ro','Markersize',5);
+        for i=1:length(all_control_osi)
+            plot([0 0.5],[all_control_osi(i) all_cno_osi(i)], 'k-');
+        end
+        plot(0,nanmean(all_control_osi),'ko','Linewidth',1.5,'Markersize',5);
+        plot(0.5,nanmean(all_cno_osi),'ro','Linewidth',1.5,'Markersize',5);
+        errorbar(0,nanmean(all_control_osi),nansem(all_control_osi),'k-','Linewidth',1.5);
+        errorbar(0.5,nanmean(all_cno_osi),nansem(all_cno_osi),'r-',  'Linewidth', 1.5);
+        yl(0,5.0);
+        xl(-0.5,1.0);
+        xticks([0,0.5]);
+        xticklabels({'Control'; 'CNO'});
+        ylabel('OSI');
+        
+
+        % Make some histograms of the SF and TF
+        % SF
+        sorted_sfs = unique(sort(all_sfs));
+        figure(3); clf;
+        subplot(1,3,1); hold on;
+        histogram(log2(all_control_sf),length(sorted_sfs),...
+            'BinEdges',[log2(sorted_sfs(1))-0.5:1:log2(sorted_sfs(end))+0.5],...
+            'Normalization','probability', ...
+            'DisplayStyle','stairs', 'LineWidth', 1.5, 'EdgeColor', [0 0 0]);
+        plot(nanmean(log2(all_control_sf)), 0.5, 'v', 'MarkerSize', 5, 'Color', [0 0 0], 'MarkerFaceColor', [0 0 0]);
+        histogram(log2(all_cno_sf),length(sorted_sfs),...
+            'BinEdges',[log2(sorted_sfs(1))-0.5:1:log2(sorted_sfs(end))+0.5],...
+            'Normalization','probability', ...
+            'DisplayStyle','stairs', 'LineWidth', 1.5, 'EdgeColor', [1 0 0]);
+        plot(nanmean(log2(all_cno_sf)), 0.5, 'v', 'MarkerSize', 5, 'Color', [1 0 0], 'MarkerFaceColor', [1 0 0]);
+        xlabel('preferred SF');
+        ylabel('proportion');
+        ylim([0 1.0]);
+        xlim([log2(sorted_sfs(1))-0.75 log2(sorted_sfs(end))+0.75]);
+        xticks(log2([sorted_sfs]));
+        xticklabels(([sorted_sfs]));
+
+
+        % TF
+        % No TF plot because only one TF was used
+
+        % TF/SF (approximation of cell's speed tuning)
+        tf_over_sf = unique(sort(all_tfs./all_sfs));
+        subplot(1,3,3); hold on;
+        histogram(log2(tf_sf_control),length(tf_over_sf),...
+            'BinEdges',[log2(tf_over_sf(1))-0.5:1:log2(tf_over_sf(end))+0.5],...
+            'Normalization','probability', ...
+            'DisplayStyle','stairs', 'LineWidth', 1.5, 'EdgeColor', [0 0 0]);
+        plot(nanmean(log2(tf_sf_control)), 0.5, 'v', 'MarkerSize', 5,  'Color', [0 0 0], 'MarkerFaceColor', [0 0 0]);
+        histogram(log2(tf_sf_cno),length(tf_over_sf),...
+            'BinEdges',[log2(tf_over_sf(1))-0.5:1:log2(tf_over_sf(end))+0.5],...
+            'Normalization','probability', ...
+            'DisplayStyle','stairs', 'LineWidth', 1.5, 'EdgeColor', [1 0 0]);
+        plot(nanmean(log2(tf_sf_cno)), 0.5, 'v', 'MarkerSize', 5,  'Color', [1 0 0], 'MarkerFaceColor', [1 0 0]);
+        xlabel('preferred TF/SF (º/s)');
+        ylabel('proportion');
+        ylim([0 1.0]);
+        xlim([log2(tf_over_sf(1))-0.75 log2(tf_over_sf(end))+0.75]);
+        xticks(log2(tf_over_sf(1)):1:log2(tf_over_sf(end)));
+
     else
         % Make some plots of control vs cno data
         figure(2); clf;
