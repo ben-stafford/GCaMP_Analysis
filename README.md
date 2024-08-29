@@ -84,7 +84,7 @@ day1_000_002_control.mat
 
 Control_CNO_Compare_Compile.m
 
-This code is still a work in progress, but is fully functional for comparing one control dataset against one CNO dataset. This code will load the output files from Tuning_Analysis.m and compare various parameters between control and CNO conditions. It is robust enough to determine whether the underlying experiments were probing SF and TF tuning or DS and OS of the ROIs. Currently, you can only input one control file and one CNO file. It should go without saying, the control and CNO files should be the same type of experiemnt (i.e. don't compare a control SF and TF tuning experiment with a CNO DS and OS tuning experiment).
+This code is still a work in progress, but is fully functional for comparing one control dataset against one CNO dataset. This code will load the output files from Tuning_Analysis.m and compare various parameters between control and CNO conditions. It is robust enough to determine whether the underlying experiments were probing SF and TF tuning or DS and OS of the ROIs. Currently, you can only input one control file and one CNO file. It should go without saying, the control and CNO files should be the same type of experiment (i.e. don't compare a control SF and TF tuning experiment with a CNO DS and OS tuning experiment).
 
 When you run Control_CNO_Compare_Compile.m there are four variables you must manually set that provide the location and names of the files to be analyzed:
 1) animal_ids: a list of animal names which are typically the mouse ear tag number. Currently, these have to be the same.
