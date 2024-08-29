@@ -40,7 +40,7 @@ When you run Suite2P_Analysis_Batch.m, you manually specify the location of the 
 4) scanboxDir: the path where the Scanbox_Files are located
 
 There are also four 'flags' representing analysis steps you can 'turn on' by setting to a value of 1. These are:
-1) analyze_all_files - when set to 1, the code will use every mat file in the Scanbox_Files directory and use it to analyze the relevant part of the fluorescence traces.
+1) analyze_all_files - when set to 1, the code will use every mat file in the Scanbox_Files directory and use it to analyze the relevant part of the fluorescence traces. When set to 0, the code will ask you to select a specific scanbox file to use for the analysis. Typically, you will want this set to 1.
 2) smoothTraces - when set to 1, this will smooth the fluoresence traces
 3) subtractNeuropil - when set to 1, this will subtract the neuropil signal from the fluorescence traces
 4) photoBleachSubtract - when set to 1, this will use the interleaved blank trials to fit the background fluorescence decay with a polynomial and subtract it from the fluorescence traces to try to linearize the dfof trace.
