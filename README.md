@@ -12,7 +12,7 @@ The general workflow from experiment to analysis looks something like this:
 5) Compile tuning properties for all rois from specific subsets of experiments by running Tuning_Analysis.m on the data structures generated in step 4. This code creates data structures containing preferred SF and TF as well as DSI, OSI, and preferred direction for each roi/cell. It is necessary to compile multiple experiments when doing this analysis because the full range of parameters tested are often collected over multiple experiments.
 6) Compare rois/cells in control versus CNO by running Control_CNO_Compare_Compile.m.
 
-The code here runs the analyzis steps outlined on steps 4-6.
+The code here runs the analysis outlined on steps 4-6.
 
 # Suite2P_Analysis_Batch.m
 
