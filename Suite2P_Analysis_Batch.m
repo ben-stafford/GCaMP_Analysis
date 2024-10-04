@@ -1,8 +1,8 @@
 % Load and analyze data from Suite2P files
 clear all
 
-animal_id = '6627';
-experiment_day = 'day2';
+animal_id = '6933';
+experiment_day = 'day1';
 
 % Change this to match the directory that contains the Suite2P mat file you
 % want to load and analyze
@@ -40,7 +40,7 @@ matFiles = dir('*.mat');
 % the external drive
 if size(matFiles,1) > 1
     goodMatFiles = {};
-    file_names = extractfield(matFiles, 'name');
+    file_names = {matFiles(1:end).name};
     for i = 1:length(file_names)
         if contains(file_names{i},'._') == 0
             goodMatFiles{end + 1} = file_names{i};
@@ -96,7 +96,7 @@ else
     hd5Files = dir('*.mat');
     % Check for hidden files that begin with '._' and exclude
     goodHd5Files = {};
-    hd5file_names = extractfield(hd5Files, 'name');
+    hd5file_names = {hd5Files(1:end).name};
     for i = 1:length(hd5file_names)
         if contains(hd5file_names{i},'._') == 0
             goodHd5Files{end + 1} = hd5file_names{i};
@@ -117,7 +117,37 @@ else
     files_to_analyze = hd5Files;
 end
 
+% Before running any analysis, get the size in frames of all the scanbox
+% files, sum them, and compare to the size of the fluorescence trace
+% imported from the Suite2P mat file.
+% Before running any analysis, get the size in frames of all the scanbox
+% files, sum them, and compare to the size of the fluorescence trace
+% imported from the Suite2P mat file.
+total_frames = 0;
+
+for i = 1:length(files_to_analyze)
+    matFileToLoad = [hd5Files{i}(1:end-4),'.mat'];
+    load(matFileToLoad);
+%     total_frames = total_frames + (info.totalFrame - 1);
+    total_frames = total_frames + (info.frame(end));
+end
+
+disp(['Total Frames: ', num2str(total_frames)]);
+disp(['Size of Suite2P Traces: ', num2str(length(tracesAll))]);
+frame_diff = length(tracesAll) - total_frames;
+mean_frame_diff = floor(frame_diff/length(files_to_analyze));
+disp(['Average Frame Offset: ', num2str(mean_frame_diff), ' frames/file']);
+prompt = 'Do you want to proceed with the analysis? (yes = 1, no = any key)? ';
+proceed = input(prompt);
+    
+if proceed ~= 1
+    return
+end
+
 for m = 1:length(files_to_analyze)
+    
+    % Changed in 2019 to 4 TTLs per stimulus
+    nTtlsPerStim = 4;
     
     % cd to the Scanbox_Files directory at the start of each loop
     cd (char(hd5FileDir));
@@ -146,9 +176,10 @@ for m = 1:length(files_to_analyze)
         for i = 1:nFile-1
             matFileToLoad = [hd5Files{i}(1:end-4),'.mat'];
             load(matFileToLoad);
-    %         disp([hd5Files{i}(1:end-4),'.mat'])
-    %         info.totalFrame
-            tFrames = tFrames + (info.totalFrame - 1);
+%             disp([hd5Files{i}(1:end-4),'.mat'])
+%             info.totalFrame
+%             tFrames = tFrames + (info.totalFrame - 1);
+            tFrames = tFrames + (info.frame(end) + mean_frame_diff);
         end
     end
 
@@ -174,6 +205,15 @@ for m = 1:length(files_to_analyze)
     if stimFrames(1) == 0
         stimFrames = stimFrames(2:end);
     end
+    
+    % This is to catch weird times where there seems to be an extra TTL
+    % thrown at the end of the scanbox file. Keep removing one TTL time in
+    % frames until there are a number of TTLs that is divisible by 4.
+    test_val = length(stimFrames);
+    while ~rem(test_val,nTtlsPerStim)*test_val/nTtlsPerStim == 0
+        test_val = test_val - 1;
+    end
+    stimFrames = stimFrames(1:test_val);
 
     % Add the number of frames that have elapsed before the file that is being
     % analyzed occurs so that the stimulus on and off times are shifted to
@@ -238,7 +278,8 @@ for m = 1:length(files_to_analyze)
     cd(spikePath);
     cd('Spike2_Files');
     spikePath = pwd;
-    stim_info = readtable([spikePath, '/', spikeFile]);
+    opts = detectImportOptions([spikePath, '/', spikeFile]);
+    stim_info = readtable([spikePath, '/', spikeFile],opts);
     stim_info = table2array(stim_info);
 
     % Voltage signal from photodiode.
@@ -468,15 +509,6 @@ for m = 1:length(files_to_analyze)
     gcamp_data(1).mean_dfof_resp = [];
     % matrix of max dfof for all trials for each cell
     gcamp_data(1).max_dfof_resp = [];
-    % Responsive p-values for t-test
-    gcamp_data(1).ttest_resp = [];
-    % Responsive p-values for anova
-    gcamp_data(1).anova_resp = [];
-    % d-prime scores
-    gcamp_data(1).dprime = [];
-    % reliability threshold pass (1 = reliable cell/ROI)
-    gcamp_data(1).reliable = [];
-
 
     % Loop through the list of cells and put data in the structure
     for i = 1:length(cellIds)
@@ -484,10 +516,6 @@ for m = 1:length(files_to_analyze)
         gcamp_data(i).dfof_traces = squeeze(dfofCellTrials(i,:,:));
         gcamp_data(i).mean_dfof_resp = squeeze(meanDfofCellTrials(i,:,:));
         gcamp_data(i).max_dfof_resp = squeeze(maxDfofCellTrials(i,:,:));
-        gcamp_data(i).ttest_resp = cellRespRelMat(i,2);
-        gcamp_data(i).anova_resp = cellRespRelMat(i,3);
-        gcamp_data(i).dprime = cellRespRelMat(i,4);
-        gcamp_data(i).reliable = cellRespRelMat(i,9);
     end
     
     % Get maximum mean fluorescence of all ROIs
